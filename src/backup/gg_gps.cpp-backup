@@ -1,0 +1,191 @@
+// #include <Arduino.h>
+#include "gg_gps.hpp"
+#include <NeoGPS_cfg.h>
+#include <ublox/ubxGPS.h>
+#include <GPSport.h>
+#include <Streamers.h>
+
+// #include "gg_debug.hpp"
+
+const unsigned int ACQ_DOT_INTERVAL = 500UL;
+
+//--------------------------
+GPS::GPS(Stream * device) : ubloxGPS(device) {
+  state = GETTING_STATUS;
+}
+
+//--------------------------
+void GPS::get_status() {
+  static bool acquiring = false;
+
+  if (fix().status == gps_fix::STATUS_NONE) {
+    static uint32_t dotPrint;
+    bool requestNavStatus = false;
+
+    if (!acquiring) {
+      acquiring = true;
+      dotPrint = millis();
+      DEBUG_PORT.print(F("Getting status (UBX_NAV_STATUS)..."));
+      requestNavStatus = true;
+    } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
+      dotPrint = millis();
+      DEBUG_PORT << '.';
+      static uint8_t requestPeriod;
+      if ((++requestPeriod & 0x07) == 0)
+        requestNavStatus = true;
+    }
+
+    if (requestNavStatus) {
+      // Turn on the UBX status message
+      if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS )){
+        DEBUG_PORT.println(F("enable UBX_NAV_STATUS failed!"));
+      } else {
+        DEBUG_PORT.print(F("poll"));
+      }
+    }
+
+  } else {
+    if (acquiring) DEBUG_PORT << '\n';
+    DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
+    if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS )) {
+      DEBUG_PORT.println(F("enable UBX_NAV_TIMEGPS failed!"));
+    } else {
+      DEBUG_PORT.println(F("enabled UBX_NAV_TIMEGPS"));
+    }
+    state = GETTING_LEAP_SECONDS;
+  }
+} // get_status
+
+//--------------------------
+void GPS::get_leap_seconds() {
+  static bool acquiring = false;
+  static uint32_t dotPrint;
+
+  if (GPSTime::leap_seconds != 0) {
+    if (acquiring) DEBUG_PORT << '\n';
+    DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
+    if (!disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS)) {
+      DEBUG_PORT.println(F("disable UBX_NAV_TIMEGPS failed!"));
+    } else {
+      DEBUG_PORT.println(F("disabled UBX_NAV_TIMEGPS"));
+    }
+    if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC)) {
+      DEBUG_PORT.println(F("enable UBX_NAV_TIMEUTC failed!"));
+    } else {
+      DEBUG_PORT.println(F("enabled UBX_NAV_TIMEUTC"));
+    }
+    state = GETTING_UTC;
+  } else {
+    if (!acquiring) {
+      acquiring = true;
+      dotPrint = millis();
+      DEBUG_PORT.print(F("Getting leap seconds..."));
+    } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
+      dotPrint = millis();
+      DEBUG_PORT << '.';
+    }
+  }
+} // get_leap_seconds
+
+//--------------------------
+void GPS::get_utc() {
+  static bool acquiring = false;
+  static uint32_t dotPrint;
+
+  lock();
+  bool            safe = is_safe();
+  NeoGPS::clock_t sow  = GPSTime::start_of_week();
+  NeoGPS::time_t  utc  = fix().dateTime;
+  unlock();
+
+  DEBUG_PORT << F("safe=") << safe << '\n';
+  DEBUG_PORT << F("utc=") << utc << '\n';
+  DEBUG_PORT << F("sow=") << sow << '\n';
+
+  if (safe && (sow != 0)) {
+    if (acquiring) DEBUG_PORT << '\n';
+    DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';
+    DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';
+    start_running();
+  } else {
+    if (!acquiring) {
+      acquiring = true;
+      dotPrint = millis();
+      DEBUG_PORT.print(F("Getting UTC..."));
+    } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
+      dotPrint = millis();
+      DEBUG_PORT << '.';
+    }
+  }
+} // get_utc
+
+//--------------------------
+void GPS::start_running() {
+  bool enabled_msg_with_time = false;
+
+  if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_POSLLH)) {
+    DEBUG_PORT.println(F("enable UBX_NAV_POSLLH failed!"));
+  } else {
+    DEBUG_PORT.println(F("enabled UBX_NAV_POSLLH"));
+  }
+  enabled_msg_with_time = true;
+
+  #if (defined(GPS_FIX_SPEED) | defined(GPS_FIX_HEADING)) & defined(UBLOX_PARSE_VELNED)
+    if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_VELNED)) {
+      DEBUG_PORT.println(F("enable UBX_NAV_VELNED failed!"));
+    } else {
+      DEBUG_PORT.println(F("enabled UBX_NAV_VELNED"));
+    }
+    enabled_msg_with_time = true;
+  #endif
+
+  #if defined(UBLOX_PARSE_DOP)
+    if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_DOP)) {
+      DEBUG_PORT.println(F("enable UBX_NAV_DOP failed!"));
+    } else {
+      DEBUG_PORT.println(F("enabled UBX_NAV_DOP"));
+    }
+    enabled_msg_with_time = true;
+  #endif
+
+  #if (defined(GPS_FIX_SATELLITES) | defined(NMEAGPS_PARSE_SATELLITES)) & defined(UBLOX_PARSE_SVINFO)
+    if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_SVINFO)) {
+      DEBUG_PORT.println(F("enable UBX_NAV_SVINFO failed!"));
+    } else {
+      DEBUG_PORT.println(F("enabled UBX_NAV_SVINFO"));
+    }
+    enabled_msg_with_time = true;
+  #endif
+
+  #if defined(UBLOX_PARSE_TIMEUTC)
+    #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE)
+      if (enabled_msg_with_time && !disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC)) {
+        DEBUG_PORT.println(F("disable UBX_NAV_TIMEUTC failed!"));
+      } else {
+        DEBUG_PORT.println(F("disabled UBX_NAV_TIMEUTC"));
+      }
+
+    #elif defined(GPS_FIX_TIME) | defined(GPS_FIX_DATE)
+      // If both aren't defined, we can't convert TOW to UTC,
+      // so ask for the separate UTC message.
+      if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC)) {
+        DEBUG_PORT.println(F("enable UBX_NAV_TIMEUTC failed!"));
+      } else {
+        DEBUG_PORT.println(F("enabled UBX_NAV_TIMEUTC"));
+      }
+    #endif
+  #endif
+
+  state = RUNNING;
+  trace_header( DEBUG_PORT );
+} // start_running
+
+//--------------------------
+bool GPS::running() {
+  switch (state) {
+    case GETTING_STATUS      : get_status      (); break;
+    case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
+    case GETTING_UTC         : get_utc         (); break;
+  }
+  return (state == RUNNING);
+} // running
