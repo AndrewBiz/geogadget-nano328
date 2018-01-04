@@ -66,6 +66,7 @@ void GPS::start_running() {
   #endif
 
   state = GETTING_STATUS;
+  // state = RUNNING;
 } // start_running
 
 //--------------------------
@@ -87,7 +88,8 @@ void GPS::get_status() {
   } else {
     if (acquiring) DEBUG_PORT << '\n';
     DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
-    state = GETTING_LEAP_SECONDS;
+    // state = GETTING_LEAP_SECONDS;
+    state = GETTING_UTC;
     // state = RUNNING;
   }
 } // get_status

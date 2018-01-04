@@ -26,7 +26,7 @@
 // stored in member /rx_msg/.  No valid flags would be available.
 
 #define UBLOX_PARSE_STATUS
-#define UBLOX_PARSE_TIMEGPS
+// #define UBLOX_PARSE_TIMEGPS
 #define UBLOX_PARSE_TIMEUTC
 #define UBLOX_PARSE_POSLLH
 // #define UBLOX_PARSE_DOP

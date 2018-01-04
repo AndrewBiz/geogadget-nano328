@@ -1,7 +1,7 @@
 #include <Arduino.h>
 //======================================================================
 //  Program: gg.cpp - GeoGadget based on UBLOX GPS receiver
-#define GG_VERSION "0.1.0"
+#define GG_VERSION "0.2.0"
 //======================================================================
 
 #include <ublox/ubxGPS.h>
@@ -36,15 +36,40 @@ void clear_display() {
   u8x8.clear();
 }
 
-void displaydata(const NMEAGPS &gps, const gps_fix &fix) {
+void displaydata_init(const NMEAGPS &gps, const gps_fix &fix) {
+  static uint32_t stick_phase_time = 0;
+  static uint8_t stick_phase = 0;
+
   u8x8.setFont(u8x8_font_artossans8_r);
 
   u8x8.setCursor(0, 0);
-  u8x8.print(F("STA: "));
-  if (fix.valid.status)
-    u8x8.print(fix.status);
-
+  u8x8.print(F("   Geo-Gadget   "));
   u8x8.setCursor(0, 1);
+  u8x8.print(F("     v" GG_VERSION "     "));
+
+  u8x8.setCursor(0, 2);
+  u8x8.print(F("getting signal "));
+  u8x8.setCursor(15, 2);
+  if (millis() - stick_phase_time > 100) {
+    // rotary phases clockwise: "|/-\|/-\"
+    stick_phase_time = millis();
+    switch (stick_phase++) {
+      case 0: u8x8.print(F("|")); break;
+      case 1: u8x8.print(F("/")); break;
+      case 2: u8x8.print(F("-")); break;
+      case 3: u8x8.print(F("\\")); break;
+      case 4: u8x8.print(F("|")); break;
+      case 5: u8x8.print(F("/")); break;
+      case 6: u8x8.print(F("-")); break;
+      case 7: u8x8.print(F("\\")); break;
+    }
+    if (stick_phase > 7) stick_phase = 0;
+  }
+  u8x8.setCursor(0, 4);
+  u8x8.print(F("STA: "));
+  u8x8.print(fix.status);
+
+  u8x8.setCursor(0, 5);
   uint16_t d = 0;
   u8x8.print(F("YMD: "));
   u8x8.print(fix.dateTime.full_year(fix.dateTime.year));
@@ -54,11 +79,7 @@ void displaydata(const NMEAGPS &gps, const gps_fix &fix) {
   u8x8.print(F("."));
   d = fix.dateTime.date;
   if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // if (fix.valid.date)
-  //   u8x8.print(F("  "));
-  // else
-  //   u8x8.print(F(" ?"));
-  u8x8.setCursor(0, 2);
+  u8x8.setCursor(0, 6);
   u8x8.print(F("HMS: "));
   d = fix.dateTime.hours;
   if (d < 10) u8x8.print(F("0")); u8x8.print(d);
@@ -68,12 +89,46 @@ void displaydata(const NMEAGPS &gps, const gps_fix &fix) {
   u8x8.print(F(":"));
   d = fix.dateTime.seconds;
   if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // if (fix.valid.time)
-  //   u8x8.print(F("  "));
-  // else
-  //   u8x8.print(F(" ?"));
+}
+
+void displaydata(const NMEAGPS &gps, const gps_fix &fix) {
+  u8x8.setFont(u8x8_font_artossans8_r);
+
+  if (not fix.valid.status) u8x8.setInverseFont(1);
+  u8x8.setCursor(0, 0);
+  u8x8.print(F("STA: "));
+  u8x8.print(fix.status);
+  u8x8.setInverseFont(0);
+
+  u8x8.setCursor(0, 1);
+  if (not fix.valid.date) u8x8.setInverseFont(1);
+  uint16_t d = 0;
+  u8x8.print(F("YMD: "));
+  u8x8.print(fix.dateTime.full_year(fix.dateTime.year));
+  u8x8.print(F("."));
+  d = fix.dateTime.month;
+  if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+  u8x8.print(F("."));
+  d = fix.dateTime.date;
+  if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+  u8x8.setInverseFont(0);
+
+  u8x8.setCursor(0, 2);
+  if (not fix.valid.time) u8x8.setInverseFont(1);
+  u8x8.print(F("HMS: "));
+  d = fix.dateTime.hours;
+  if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+  u8x8.print(F(":"));
+  d = fix.dateTime.minutes;
+  if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+  u8x8.print(F(":"));
+  d = fix.dateTime.seconds;
+  if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+  u8x8.setInverseFont(0);
 
   char _float_buf11[12];
+  if (not fix.valid.location || fix.status == gps_fix::STATUS_NONE)
+    u8x8.setInverseFont(1);
   u8x8.setCursor(0, 3);
   u8x8.print(F("LAT: "));
   dtostrf(fix.latitude(), 11, 6, _float_buf11);  /* 11 width, 6 precision */
@@ -83,11 +138,14 @@ void displaydata(const NMEAGPS &gps, const gps_fix &fix) {
   u8x8.print(F("LON: "));
   dtostrf(fix.longitude(), 11, 6, _float_buf11);  /* 11 width, 6 precision */
   u8x8.print(_float_buf11);
+  u8x8.setInverseFont(0);
 
+  if (not fix.valid.altitude) u8x8.setInverseFont(1);
   u8x8.setCursor(0, 5);
   u8x8.print(F("ALT: "));
   u8x8.print(int(trunc(fix.altitude())));
   u8x8.print(F(" m"));
+  u8x8.setInverseFont(0);
 
   u8x8.clearLine(6);
   u8x8.setCursor(0, 6);
@@ -139,7 +197,7 @@ void setup() {
 
   u8x8.begin();
 
-  DEBUG_PORT.println(F("GeoGadget V" GG_VERSION));
+  DEBUG_PORT.println(F("GeoGadget v" GG_VERSION));
   D(DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';)
   D(DEBUG_PORT << F("GPS object size = ") << sizeof(gps) << '\n';)
   DEBUG_PORT.flush();
@@ -167,12 +225,14 @@ void setup() {
       //   pstate = gps.state;
       // }
     }
+    displaydata_init(gps, fix);
   } while (not running);
 
   // SD card initializing
   setup_sd(gps, fix);
 
   D(trace_header(DEBUG_PORT);)
+  clear_display();
 }
 
 //--------------------------

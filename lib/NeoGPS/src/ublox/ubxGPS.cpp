@@ -890,8 +890,8 @@ bool ubloxGPS::parseNavTimeUTC( uint8_t chr )
 
             #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE)
               if (m_fix.valid.date &&
-                  (GPSTime::start_of_week() == 0) &&
-                  (GPSTime::leap_seconds    != 0))
+                  (GPSTime::start_of_week() == 0)) //&& // !!!ANB hacked
+                  // (GPSTime::leap_seconds    != 0))   // !!! no need for UTC Time
                 GPSTime::start_of_week( m_fix.dateTime );
             #endif
 //trace << m_fix.dateTime << F(".") << m_fix.dateTime_cs;

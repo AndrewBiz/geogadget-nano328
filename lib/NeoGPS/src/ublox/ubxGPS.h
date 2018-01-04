@@ -59,16 +59,16 @@ public:
 
 
     //................................................................
-    // Process one character of ublox message.  The internal state 
+    // Process one character of ublox message.  The internal state
     // machine tracks what part of the sentence has been received.  As the
     // tracks what part of the sentence has been received so far.  As the
-    // sentence is received, members of the /fix/ structure are updated.  
+    // sentence is received, members of the /fix/ structure are updated.
     // @return DECODE_COMPLETED when a sentence has been completely received.
 
     decode_t decode( char c );
 
     //................................................................
-    // Received message header.  Payload is only stored if /storage/ is 
+    // Received message header.  Payload is only stored if /storage/ is
     // overridden for that message type.  This is the UBX-specific
     // version of "nmeaMessage".
 
@@ -85,7 +85,7 @@ public:
     {
       return send( ublox::cfg_msg_t( msg_class, msg_id, 0 ) );
     }
-    
+
     //................................................................
     // Send a message (non-blocking).
     //    Although multiple /send_request/s can be issued,
@@ -204,7 +204,7 @@ protected:
 
     void wait_for_idle();
     bool wait_for_ack();
-      //  NOTE: /run/ is called from these blocking functions 
+      //  NOTE: /run/ is called from these blocking functions
 
 
     bool waiting() const
@@ -299,28 +299,29 @@ private:
 
     bool parseTOW( uint8_t chr )
     {
-      #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE)
-        if (chrCount == 0) {
-          m_fix.valid.date =
-          m_fix.valid.time = false;
-        }
-
-        ((uint8_t *) &m_fix.dateTime)[ chrCount ] = chr;
-
-        if (chrCount == 3) {
-          uint32_t tow = *((uint32_t *) &m_fix.dateTime);
-          //trace << PSTR("@ ") << tow;
-
-          uint16_t ms;
-          if (GPSTime::from_TOWms( tow, m_fix.dateTime, ms )) {
-            m_fix.dateTime_cs = ms / 10;
-            m_fix.valid.time = true;
-            m_fix.valid.date = true;
-          } else
-            m_fix.dateTime.init();
-          //trace << PSTR(".") << m_fix.dateTime_cs;
-        }
-      #endif
+      // ANB hacked - I beleive there is no need to get Date Time from TOW
+      // #if defined(GPS_FIX_TIME) & defined(GPS_FIX_DATE)
+      //   if (chrCount == 0) {
+      //     m_fix.valid.date =
+      //     m_fix.valid.time = false;
+      //   }
+      //
+      //   ((uint8_t *) &m_fix.dateTime)[ chrCount ] = chr;
+      //
+      //   if (chrCount == 3) {
+      //     uint32_t tow = *((uint32_t *) &m_fix.dateTime);
+      //     //trace << PSTR("@ ") << tow;
+      //
+      //     uint16_t ms;
+      //     if (GPSTime::from_TOWms( tow, m_fix.dateTime, ms )) {
+      //       m_fix.dateTime_cs = ms / 10;
+      //       m_fix.valid.time = true;
+      //       m_fix.valid.date = true;
+      //     } else
+      //       m_fix.dateTime.init();
+      //     //trace << PSTR(".") << m_fix.dateTime_cs;
+      //   }
+      // #endif
 
       return true;
     }
