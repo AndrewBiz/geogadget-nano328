@@ -142,11 +142,11 @@ void setup() {
   DEBUG_PORT.println(F("GeoGadget V" GG_VERSION));
   D(DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';)
   D(DEBUG_PORT << F("GPS object size = ") << sizeof(gps) << '\n';)
-  D(DEBUG_PORT.println(F("Looking for GPS device on " GPS_PORT_NAME));)
   DEBUG_PORT.flush();
 
   // GPS device initializing
   gpsPort.begin(9600);
+  DEBUG_PORT.println(F("Looking for GPS device on " GPS_PORT_NAME));
   // TODO: put to start_running:
   configNMEA(0);
   disableUBX();
