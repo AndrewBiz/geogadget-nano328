@@ -6,37 +6,34 @@
 // Error messages stored in flash.
 #define error(msg) sd.errorHalt(F(msg))
 
+// Seek to fileSize + this position before writing track points.
+#define GPX_ENDING_OFFSET -24
+#define GPX_ENDING "\t</trkseg></trk>\n</gpx>\n"
+
 const uint8_t chipSelect = SS;
 
 SdFat sd;
 SdFile gg_file;
 char gg_file_name[13] = FILE_BASE_NAME "00.GPX";
+char gg_dir_name[9] = "";
 
 //--------------------------
-// Log a data record to SD card file
-void log_fix(const NMEAGPS &gps, const gps_fix &fix) {
-  gg_file.print(fix.dateTime); gg_file.write(',');
-  gg_file.print(fix.latitude(), 6); gg_file.write(',');
-  gg_file.print(fix.longitude(), 6); gg_file.write(',');
-  gg_file.print(fix.altitude(), 1); gg_file.write(',');
-
-  gg_file.println();
-  // Force data to SD and update the directory entry to avoid data loss.
-  if (!gg_file.sync() || gg_file.getWriteError()) {
-    error("write error");
+void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint8_t minutes, uint8_t seconds) {
+  if (!sd.chdir(true)) {
+    error("chdir 1");
   }
-}
-
-// SD card initializing
-void setup_sd(const NMEAGPS &gps, const gps_fix &fix) {
-  // Initialize at the highest speed supported by the board that is
-  // not over 50 MHz. Try a lower speed if SPI errors occur.
-  if (!sd.begin(chipSelect, SD_SCK_MHZ(50))) {
-    sd.initErrorHalt();
+  // create dir for today
+  snprintf(
+      gg_dir_name, 9,
+      "%04d%02d%02d",
+      year, month, date);
+  if (!sd.exists(gg_dir_name)) {
+    if (!sd.mkdir(gg_dir_name)) {
+      error("Create dir");
+    }
   }
-  // Find an unused file name.
-  if (BASE_NAME_SIZE > 6) {
-    error("file name too long");
+  if (!sd.chdir(gg_dir_name, true)) {
+    error("chdir 2");
   }
   while (sd.exists(gg_file_name)) {
     if (gg_file_name[BASE_NAME_SIZE + 1] != '9') {
@@ -45,22 +42,81 @@ void setup_sd(const NMEAGPS &gps, const gps_fix &fix) {
       gg_file_name[BASE_NAME_SIZE + 1] = '0';
       gg_file_name[BASE_NAME_SIZE]++;
     } else {
-      error("Can't create file name");
+      error("create fname");
     }
   }
   if (!gg_file.open(gg_file_name, O_CREAT | O_WRITE | O_EXCL)) {
-    error("gg_file.open");
+    error("file open");
   }
   // set file datetimes
-  if (!gg_file.timestamp(T_CREATE, fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds)) {
-    error("set create time failed");
+  if (!gg_file.timestamp(T_CREATE, year, month, date, hours, minutes, seconds)) {
+    error("set CREATE time");
   }
-  if (!gg_file.timestamp(T_WRITE, fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds)) {
-    error("set WRITE time failed");
+  if (!gg_file.timestamp(T_WRITE, year, month, date, hours, minutes, seconds)) {
+    error("set WRITE time");
   }
-  if (!gg_file.timestamp(T_ACCESS, fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds)) {
-    error("set ACCESS time failed");
+  if (!gg_file.timestamp(T_ACCESS, year, month, date, hours, minutes, seconds)) {
+    error("set ACCESS time");
   }
+  gg_file.print(F(
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<gpx version=\"1.0\">\n"
+    "\t<trk><trkseg>\n"));
+  gg_file.print(F(GPX_ENDING));
+}
+
+//--------------------------
+// Log a data record to SD card file
+void log_fix(const NMEAGPS &gps, const gps_fix &fix) {
+  //TODO replace with seekEND
+  gg_file.seekSet(gg_file.fileSize() + GPX_ENDING_OFFSET);
+  gg_file.print(F("\t\t<trkpt "));
+
+  gg_file.print(F("lat=\""));
+  gg_file.print(fix.latitude(), 6);
+  gg_file.print(F("\" lon=\""));
+  gg_file.print(fix.longitude(), 6);
+  gg_file.print(F("\">"));
+
+  gg_file.print(F("<time>"));
+  char _buf24[25];
+  snprintf(
+      _buf24, 25,
+      "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ",
+      fix.dateTime.full_year(fix.dateTime.year),
+      fix.dateTime.month,
+      fix.dateTime.date,
+      fix.dateTime.hours,
+      fix.dateTime.minutes,
+      fix.dateTime.seconds,
+      fix.dateTime_ms());
+  gg_file.print(_buf24);
+  gg_file.print(F("</time>"));
+
+  gg_file.print(F("<ele>")); // meters
+  gg_file.print(fix.altitude(), 2);
+  gg_file.print(F("</ele>"));
+  gg_file.print(F("</trkpt>\n"));
+  gg_file.print(F(GPX_ENDING));
+
+  // Force data to SD and update the directory entry to avoid data loss.
+  if (!gg_file.sync() || gg_file.getWriteError()) {
+    error("write file");
+  }
+}
+
+//--------------------------
+// SD card initializing
+void setup_sd(const NMEAGPS &gps, const gps_fix &fix) {
+  // Initialize at the highest speed supported by the board that is
+  // not over 50 MHz. Try a lower speed if SPI errors occur.
+  if (!sd.begin(chipSelect, SD_SCK_MHZ(50))) {
+    sd.initErrorHalt();
+  }
+  create_file(fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
+
   DEBUG_PORT.print(F("Logging to: "));
+  DEBUG_PORT.print(gg_dir_name);
+  DEBUG_PORT.print(F("/"));
   DEBUG_PORT.println(gg_file_name);
 }

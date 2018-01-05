@@ -4,7 +4,7 @@
 #include <NeoGPS_cfg.h>
 #include <ublox/ubxGPS.h>
 #include <GPSport.h>
-#include <Streamers.h>
+D(#include <Streamers.h>)
 
 const unsigned int ACQ_DOT_INTERVAL = 500UL;
 
@@ -79,18 +79,16 @@ void GPS::get_status() {
     if (!acquiring) {
       acquiring = true;
       dotPrint = millis();
-      DEBUG_PORT.print(F("Getting STATUS..."));
+      D(DEBUG_PORT.print(F("Getting STATUS..."));)
     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
       dotPrint = millis();
-      DEBUG_PORT << '.';
+      DEBUG_PORT.print(F("."));
     }
 
   } else {
-    if (acquiring) DEBUG_PORT << '\n';
-    DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';
-    // state = GETTING_LEAP_SECONDS;
+    D(if (acquiring) DEBUG_PORT << '\n';)
+    D(DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';)
     state = GETTING_UTC;
-    // state = RUNNING;
   }
 } // get_status
 
@@ -123,13 +121,13 @@ void GPS::get_utc() {
   lock();
   bool            safe = is_safe();
   NeoGPS::clock_t sow  = GPSTime::start_of_week();
-  NeoGPS::time_t  utc  = fix().dateTime;
+  D(NeoGPS::time_t  utc  = fix().dateTime;)
   unlock();
 
   if (safe && (sow != 0)) {
-    if (acquiring) DEBUG_PORT << '\n';
-    DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';
-    DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';
+    D(if (acquiring) DEBUG_PORT << '\n';)
+    D(DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';)
+    D(DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';)
     // go to running state
     state = RUNNING;
   } else {
@@ -139,7 +137,7 @@ void GPS::get_utc() {
       DEBUG_PORT.print(F("Getting UTC..."));
     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
       dotPrint = millis();
-      DEBUG_PORT << '.';
+      DEBUG_PORT.print(F("."));
     }
   }
 } // get_utc
