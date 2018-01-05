@@ -197,7 +197,7 @@ void setup() {
 
   u8x8.begin();
 
-  DEBUG_PORT.println(F("GeoGadget v" GG_VERSION));
+  DEBUG_PORT.println(F("Geo-Gadget v" GG_VERSION));
   D(DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';)
   D(DEBUG_PORT << F("GPS object size = ") << sizeof(gps) << '\n';)
   DEBUG_PORT.flush();
@@ -209,21 +209,12 @@ void setup() {
   configNMEA(0);
   disableUBX();
 
-  // D(DEBUG_PORT.println(F("\n----------gps.START_RUNNING----------"));)
   gps.start_running();
-  // _dumpPort(gpsPort, DEBUG_PORT, 1500UL);
-
-  // int pstate = gps.state;
   bool running = false;
   do {
     if (gps.available(gpsPort)) {
       fix = gps.read();
       running = gps.running();
-      // if (gps.state != pstate) {
-      //   DEBUG_PORT.println(F("\n++++++++++gps.state CHANGED++++++++++"));
-      //   _dumpPort(gpsPort, DEBUG_PORT, 1500UL);
-      //   pstate = gps.state;
-      // }
     }
     displaydata_init(gps, fix);
   } while (not running);
