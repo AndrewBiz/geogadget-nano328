@@ -95,25 +95,25 @@ void GPS::get_status() {
 } // get_status
 
 //--------------------------
-void GPS::get_leap_seconds() {
-  static bool acquiring = false;
-  static uint32_t dotPrint;
-
-  if (GPSTime::leap_seconds != 0) {
-    if (acquiring) DEBUG_PORT << '\n';
-    DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
-    state = GETTING_UTC;
-  } else {
-    if (!acquiring) {
-      acquiring = true;
-      dotPrint = millis();
-      DEBUG_PORT.print(F("Getting leap seconds..."));
-    } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
-      dotPrint = millis();
-      DEBUG_PORT << '.';
-    }
-  }
-} // get_leap_seconds
+// void GPS::get_leap_seconds() {
+//   static bool acquiring = false;
+//   static uint32_t dotPrint;
+//
+//   if (GPSTime::leap_seconds != 0) {
+//     if (acquiring) DEBUG_PORT << '\n';
+//     DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
+//     state = GETTING_UTC;
+//   } else {
+//     if (!acquiring) {
+//       acquiring = true;
+//       dotPrint = millis();
+//       DEBUG_PORT.print(F("Getting leap seconds..."));
+//     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
+//       dotPrint = millis();
+//       DEBUG_PORT << '.';
+//     }
+//   }
+// } // get_leap_seconds
 
 //--------------------------
 void GPS::get_utc() {
@@ -148,7 +148,7 @@ void GPS::get_utc() {
 bool GPS::running() {
   switch (state) {
     case GETTING_STATUS      : get_status      (); break;
-    case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
+    // case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
     case GETTING_UTC         : get_utc         (); break;
   }
   return (state == RUNNING);

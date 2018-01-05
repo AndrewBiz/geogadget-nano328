@@ -13,7 +13,7 @@ class GPS : public ubloxGPS {
 public:
   enum {
     GETTING_STATUS,
-    GETTING_LEAP_SECONDS,
+    // GETTING_LEAP_SECONDS,
     GETTING_UTC,
     RUNNING
   } state NEOGPS_BF(8);
