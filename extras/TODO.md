@@ -6,3 +6,5 @@
 - [ ] do sd.sync every 10 secs (its too expensive operation)
 - [ ] upgrade to GPX 1.1
 - [ ] add header info to GPX (Geo-Gadged, version, url)
+- [ ] refactor to use FormatDate and FormatTime functions
+- [ ] add SATs info (starting screen, operation screen)
