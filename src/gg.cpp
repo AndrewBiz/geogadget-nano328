@@ -34,7 +34,7 @@ void clear_display() {
   u8x8.clear();
 }
 
-void displaydata_init(const NMEAGPS &gps, const gps_fix &fix) {
+void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   static uint32_t stick_phase_time = 0;
   static uint8_t stick_phase = 0;
 
@@ -105,7 +105,7 @@ void displaydata_init(const NMEAGPS &gps, const gps_fix &fix) {
   // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
 }
 
-void displaydata(const NMEAGPS &gps, const gps_fix &fix) {
+void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.setFont(u8x8_font_artossans8_r);
 
   if (not fix.valid.status) u8x8.setInverseFont(1);
