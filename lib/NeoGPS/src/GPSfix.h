@@ -399,7 +399,7 @@ public:
   //         left |= right;  // explicit merge
 
   // ANB TODO: maybe to merge dateTime despite validity...
-  
+
   gps_fix & operator |=( const gps_fix & r )
   {
     // Replace /status/  only if the right is more "accurate".
