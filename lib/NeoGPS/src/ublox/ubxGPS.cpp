@@ -876,8 +876,8 @@ bool ubloxGPS::parseNavTimeUTC( uint8_t chr )
           case 18: m_fix.dateTime.seconds = chr; break;
         #endif
 
-        case 19:
-          {
+        case 19: {
+            // TODO: ANB - Раскурить...
             ublox::nav_timeutc_t::valid_t &v =
               *((ublox::nav_timeutc_t::valid_t *) &chr);
 
