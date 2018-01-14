@@ -124,7 +124,7 @@ namespace ublox {
     } __attribute__((packed));
 
     extern bool configNMEA( ubloxGPS &gps, NMEAGPS::nmea_msg_t msgType, uint8_t rate );
-    
+
     // Reset command
     struct cfg_reset_t : msg_t {
 
@@ -176,7 +176,7 @@ namespace ublox {
     struct cfg_rate_t : msg_t {
         uint16_t        GPS_meas_rate;
         uint16_t        nav_rate;
-        enum time_ref_t time_ref:16;
+        enum time_ref_t time_ref:16; //FIXME: exceeds its type
 
         cfg_rate_t( uint16_t gr, uint16_t nr, enum time_ref_t tr )
           : msg_t( UBX_CFG, UBX_CFG_RATE, UBX_MSG_LEN(*this) )
@@ -222,7 +222,7 @@ namespace ublox {
           struct parameter_mask_t apply;
           uint16_t                apply_word;
         } __attribute__((packed));
-                
+
         enum dyn_model_t       dyn_model:8;
         enum position_fix_t    fix_mode:8;
         int32_t                fixed_alt;          // m MSL x0.01
@@ -282,7 +282,7 @@ namespace ublox {
           bool time_of_week:1;
         } __attribute__((packed))
           flags;
-        
+
         static gps_fix::status_t to_status( enum gps_fix::status_t status, flags_t flags )
         {
           if (!flags.gps_fix)
@@ -291,7 +291,7 @@ namespace ublox {
             return gps_fix::STATUS_DGPS;
           return status;
         }
-        
+
         struct {
           bool dgps_input:1;
           bool _skip_:6;
@@ -358,7 +358,7 @@ namespace ublox {
         int32_t  heading;      // degrees * 1e5
         uint32_t speed_acc;    // cm/s
         uint32_t heading_acc;  // degrees * 1e5
-        
+
         nav_velned_t() : msg_t( UBX_NAV, UBX_NAV_VELNED, UBX_MSG_LEN(*this) ) {};
     }  __attribute__((packed));
 
@@ -417,11 +417,11 @@ namespace ublox {
           bool    orbit_AOP   :1; // orbit info is AssistNow Autonomous
           bool    smoothed    :1; // Carrier smoothed pseudorange used
           enum {
-              IDLE, 
-              SEARCHING, 
-              ACQUIRED, 
-              UNUSABLE, 
-              CODE_LOCK, 
+              IDLE,
+              SEARCHING,
+              ACQUIRED,
+              UNUSABLE,
+              CODE_LOCK,
               CODE_AND_CARRIER_LOCK_1,
               CODE_AND_CARRIER_LOCK_2,
               CODE_AND_CARRIER_LOCK_3
