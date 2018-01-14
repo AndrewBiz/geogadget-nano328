@@ -237,9 +237,7 @@
 //   //  A little preprocessor magic to get a nice string
 //   #define xstr(x) str(x)
 //   #define str(x) #x
-//   #define GPS_PORT_NAME \
-//     xstr(SS_TYPE) "( RX pin " xstr(RX_PIN) \
-//                   ", TX pin " xstr(TX_PIN) " )"
+//   #define GPS_PORT_NAME xstr(SS_TYPE) "( RX pin " xstr(RX_PIN) ", TX pin " xstr(TX_PIN) " )"
 //
 //   #ifdef NEOGPS_USE_SERIAL1
 //     //  If you *really* want to do this, or you just happened to include
@@ -247,9 +245,7 @@
 //     //  better off *not* including this file.  Just declare
 //     //  your own gpsPort in your INO file.
 //
-//     #error You should be using Serial1 for the GPS device.  \
-//         Software serial libraries are very inefficient and unreliable when \
-//         used for GPS communications!
+//     #error You should be using Serial1 for the GPS device. Software serial libraries are very inefficient and unreliable when  used for GPS communications!
 //   #endif
 //
 // #endif
