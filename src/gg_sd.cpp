@@ -1,6 +1,7 @@
 #include "gg_debug.hpp"
 #include "gg_sd.hpp"
 #include "gg_gps.hpp"
+#include "gg_format.hpp"
 
 #include <SdFat.h>
 // Error messages stored in flash.
@@ -23,10 +24,7 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
     error("chdir 1");
   }
   // create dir for today
-  snprintf(
-      gg_dir_name, 9,
-      "%04d%02d%02d",
-      year, month, date);
+  format_date(gg_dir_name, ' ', year, month, date);
   if (!sd.exists(gg_dir_name)) {
     if (!sd.mkdir(gg_dir_name)) {
       error("Create dir");
@@ -35,6 +33,19 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
   if (!sd.chdir(gg_dir_name, true)) {
     error("chdir 2");
   }
+  // TODO: Alternative way of file name generation
+  // Pick a numbered filename, 00 to 99.
+  // char filename[15] = "data_##.txt";
+  //
+  // for (uint8_t i=0; i<100; i++) {
+  //   filename[5] = '0' + i/10;
+  //   filename[6] = '0' + i%10;
+  //   if (!SD.exists(filename)) {
+  //     // Use this one!
+  //     break;
+  //   }
+  // }
+
   while (sd.exists(gg_file_name)) {
     if (gg_file_name[BASE_NAME_SIZE + 1] != '9') {
       gg_file_name[BASE_NAME_SIZE + 1]++;
@@ -67,7 +78,8 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
 
 //--------------------------
 // Log a data record to SD card file
-void log_fix(const NMEAGPS &gps, const gps_fix &fix) {
+void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
+  char _buf[11];
   //TODO replace with seekEND
   gg_file.seekSet(gg_file.fileSize() + GPX_ENDING_OFFSET);
   gg_file.print(F("\t\t<trkpt "));
@@ -79,20 +91,25 @@ void log_fix(const NMEAGPS &gps, const gps_fix &fix) {
   gg_file.print(F("\">"));
 
   gg_file.print(F("<time>"));
-  char _buf24[25];
-  snprintf(
-      _buf24, 25,
-      "%04d-%02d-%02dT%02d:%02d:%02d.%03dZ",
+  gg_file.print(
+    format_date( _buf, '-',
       fix.dateTime.full_year(fix.dateTime.year),
       fix.dateTime.month,
-      fix.dateTime.date,
+      fix.dateTime.date
+    )
+  );
+  gg_file.print(F("T"));
+  gg_file.print(
+    format_time( _buf, ':',
       fix.dateTime.hours,
       fix.dateTime.minutes,
-      fix.dateTime.seconds,
-      fix.dateTime_ms());
-  gg_file.print(_buf24);
+      fix.dateTime.seconds
+    )
+  );
+  gg_file.print(F("Z"));
   gg_file.print(F("</time>"));
 
+  // TODO: avoid printing bad elevation data
   gg_file.print(F("<ele>")); // meters
   gg_file.print(fix.altitude(), 2);
   gg_file.print(F("</ele>"));

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 //======================================================================
 //  Program: gg.cpp - GeoGadget based on UBLOX GPS receiver
-#define GG_VERSION "0.9.0"
+#define GG_VERSION "0.9.2"
 //======================================================================
 
 #include <ublox/ubxGPS.h>
@@ -15,6 +15,7 @@
 #include "gg_debug.hpp"
 #include "gg_gps.hpp"
 #include "gg_sd.hpp"
+#include "gg_format.hpp"
 
 AltSoftSerial gpsPort;
 
@@ -30,6 +31,7 @@ bool display_is_sleeping = false;
 /*****************************************************************************
    Display in diff modes
 *****************************************************************************/
+// TODO: move to gg_display
 void clear_display() {
   u8x8.clear();
 }
@@ -37,6 +39,8 @@ void clear_display() {
 void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   static uint32_t stick_phase_time = 0;
   static uint8_t stick_phase = 0;
+
+  char _buf[11];
 
   u8x8.setFont(u8x8_font_artossans8_r);
 
@@ -50,6 +54,7 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.setCursor(15, 2);
   if (millis() - stick_phase_time > 100) {
     // rotary phases clockwise: "|/-\|/-\"
+    // TODO: optimize rotary algo
     stick_phase_time = millis();
     switch (stick_phase++) {
       case 0: u8x8.print(F("|")); break;
@@ -68,44 +73,29 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.print(fix.status);
 
   u8x8.setCursor(0, 5);
-  // uint16_t d = 0;
-  char _buf10[11];
   u8x8.print(F("YMD: "));
-  snprintf(
-      _buf10, 11,
-      "%04d.%02d.%02d",
+  u8x8.print(
+    format_date( _buf, '.',
       fix.dateTime.full_year(fix.dateTime.year),
       fix.dateTime.month,
-      fix.dateTime.date);
-  u8x8.print(_buf10);
-  // u8x8.print(fix.dateTime.full_year(fix.dateTime.year));
-  // u8x8.print(F("."));
-  // d = fix.dateTime.month;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // u8x8.print(F("."));
-  // d = fix.dateTime.date;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+      fix.dateTime.date
+    )
+  );
 
   u8x8.setCursor(0, 6);
   u8x8.print(F("HMS: "));
-  snprintf(
-      _buf10, 9,
-      "%02d:%02d:%02d",
+  u8x8.print(
+    format_time( _buf, ':',
       fix.dateTime.hours,
       fix.dateTime.minutes,
-      fix.dateTime.seconds);
-  u8x8.print(_buf10);
-  // d = fix.dateTime.hours;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // u8x8.print(F(":"));
-  // d = fix.dateTime.minutes;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // u8x8.print(F(":"));
-  // d = fix.dateTime.seconds;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+      fix.dateTime.seconds
+    )
+  );
 }
 
 void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
+  char _buf[12];
+
   u8x8.setFont(u8x8_font_artossans8_r);
 
   if (not fix.valid.status) u8x8.setInverseFont(1);
@@ -116,57 +106,39 @@ void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
 
   u8x8.setCursor(0, 1);
   if (not fix.valid.date) u8x8.setInverseFont(1);
-  // uint16_t d = 0;
-  char _buf10[11];
   u8x8.print(F("YMD: "));
-  snprintf(
-      _buf10, 11,
-      "%04d.%02d.%02d",
+  u8x8.print(
+    format_date( _buf, '.',
       fix.dateTime.full_year(fix.dateTime.year),
       fix.dateTime.month,
-      fix.dateTime.date);
-  u8x8.print(_buf10);
-  // u8x8.print(fix.dateTime.full_year(fix.dateTime.year));
-  // u8x8.print(F("."));
-  // d = fix.dateTime.month;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // u8x8.print(F("."));
-  // d = fix.dateTime.date;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+      fix.dateTime.date
+    )
+  );
   u8x8.setInverseFont(0);
 
   u8x8.setCursor(0, 2);
   if (not fix.valid.time) u8x8.setInverseFont(1);
   u8x8.print(F("HMS: "));
-  snprintf(
-      _buf10, 9,
-      "%02d:%02d:%02d",
+  u8x8.print(
+    format_time( _buf, ':',
       fix.dateTime.hours,
       fix.dateTime.minutes,
-      fix.dateTime.seconds);
-  u8x8.print(_buf10);
-  // d = fix.dateTime.hours;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // u8x8.print(F(":"));
-  // d = fix.dateTime.minutes;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
-  // u8x8.print(F(":"));
-  // d = fix.dateTime.seconds;
-  // if (d < 10) u8x8.print(F("0")); u8x8.print(d);
+      fix.dateTime.seconds
+    )
+  );
   u8x8.setInverseFont(0);
 
-  char _float_buf11[12];
   if (not fix.valid.location || fix.status == gps_fix::STATUS_NONE)
     u8x8.setInverseFont(1);
   u8x8.setCursor(0, 3);
   u8x8.print(F("LAT: "));
-  dtostrf(fix.latitude(), 11, 6, _float_buf11);  /* 11 width, 6 precision */
-  u8x8.print(_float_buf11);
+  dtostrf(fix.latitude(), 11, 6, _buf);  /* 11 width, 6 precision */
+  u8x8.print(_buf);
 
   u8x8.setCursor(0, 4);
   u8x8.print(F("LON: "));
-  dtostrf(fix.longitude(), 11, 6, _float_buf11);  /* 11 width, 6 precision */
-  u8x8.print(_float_buf11);
+  dtostrf(fix.longitude(), 11, 6, _buf);  /* 11 width, 6 precision */
+  u8x8.print(_buf);
   u8x8.setInverseFont(0);
 
   if (not fix.valid.altitude) u8x8.setInverseFont(1);
@@ -193,13 +165,15 @@ void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
 }
 
 //--------------------------
-static void configNMEA(uint8_t rate) {
+// TODO: move to gg_gps
+static void configNMEA(uint8_t val) {
   for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
-    ublox::configNMEA( gps, (NMEAGPS::nmea_msg_t) i, rate );
+    ublox::configNMEA( gps, (NMEAGPS::nmea_msg_t) i, val );
   }
 }
 
 //--------------------------
+// TODO: move to gg_gps
 static void disableUBX() {
   gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS );
   gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS );
@@ -238,6 +212,7 @@ void setup() {
       running = gps.running();
     }
     displaydata_init(gps, fix);
+    // _dumpPort(gpsPort, DEBUG_PORT, 1500);
   } while (not running);
 
   // SD card initializing
