@@ -9,5 +9,6 @@
 - [ ] add header info to GPX (Geo-Gadged, version, url)
 - [ ] add SATs info (starting screen, operation screen)
 - [ ] do  SD card init message (like in NMEASDLOG.ino)
+- [ ] try implicit merging in NMEAGPS_cfg
 - [ ] to understand: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
