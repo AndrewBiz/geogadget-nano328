@@ -1,7 +1,7 @@
 #include <Arduino.h>
 //======================================================================
 //  Program: gg.cpp - GeoGadget based on UBLOX GPS receiver
-#define GG_VERSION "0.9.2"
+#define GG_VERSION "0.9.3"
 //======================================================================
 
 #include <ublox/ubxGPS.h>
@@ -36,9 +36,12 @@ void clear_display() {
   u8x8.clear();
 }
 
+const uint8_t number_spin_steps = 8;
+const char spin_step[number_spin_steps] PROGMEM = {'|','/','-','\\','|','/','-','\\'};
+
 void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
-  static uint32_t stick_phase_time = 0;
-  static uint8_t stick_phase = 0;
+  static uint32_t spin_phase_time = 0;
+  static uint8_t spin_phase = 0;
 
   char _buf[11];
 
@@ -52,21 +55,11 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.setCursor(0, 2);
   u8x8.print(F("getting signal "));
   u8x8.setCursor(15, 2);
-  if (millis() - stick_phase_time > 100) {
-    // rotary phases clockwise: "|/-\|/-\"
-    // TODO: optimize rotary algo
-    stick_phase_time = millis();
-    switch (stick_phase++) {
-      case 0: u8x8.print(F("|")); break;
-      case 1: u8x8.print(F("/")); break;
-      case 2: u8x8.print(F("-")); break;
-      case 3: u8x8.print(F("\\")); break;
-      case 4: u8x8.print(F("|")); break;
-      case 5: u8x8.print(F("/")); break;
-      case 6: u8x8.print(F("-")); break;
-      case 7: u8x8.print(F("\\")); break;
-    }
-    if (stick_phase > 7) stick_phase = 0;
+  if (millis() - spin_phase_time > 100) {
+    // spin phases clockwise: "|/-\|/-\"
+    spin_phase_time = millis();
+    u8x8.print((char)pgm_read_byte(&(spin_step[spin_phase++])));
+    if (spin_phase >= number_spin_steps) spin_phase = 0;
   }
   u8x8.setCursor(0, 4);
   u8x8.print(F("STA: "));
