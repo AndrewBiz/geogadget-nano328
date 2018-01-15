@@ -12,3 +12,4 @@
 - [ ] try implicit merging in NMEAGPS_cfg
 - [ ] to understand: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
+- [ ] try alt NeoSerial lib
