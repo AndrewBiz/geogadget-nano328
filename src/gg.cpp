@@ -1,9 +1,4 @@
 #include <Arduino.h>
-//======================================================================
-//  Program: gg.cpp - GeoGadget based on UBLOX GPS receiver
-#define GG_VERSION "0.9.3"
-//======================================================================
-
 #include <ublox/ubxGPS.h>
 #include <GPSport.h>
 #include <U8x8lib.h>
@@ -11,6 +6,7 @@
 #define GPS_PORT_NAME "AltSoftSerial(RX pin 8, TX pin 9)"
 #include <PinButton.h>
 
+#include "gg_version.hpp"
 #include "gg_int.hpp"
 #include "gg_debug.hpp"
 #include "gg_gps.hpp"
@@ -66,6 +62,7 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.print(fix.status);
 
   u8x8.setCursor(0, 5);
+  if (not fix.valid.date) u8x8.setInverseFont(1);
   u8x8.print(F("YMD: "));
   u8x8.print(
     format_date( _buf, '.',
@@ -74,8 +71,10 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
       fix.dateTime.date
     )
   );
+  u8x8.setInverseFont(0);
 
   u8x8.setCursor(0, 6);
+  if (not fix.valid.time) u8x8.setInverseFont(1);
   u8x8.print(F("HMS: "));
   u8x8.print(
     format_time( _buf, ':',
@@ -84,6 +83,7 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
       fix.dateTime.seconds
     )
   );
+  u8x8.setInverseFont(0);
 }
 
 void displaydata(const NMEAGPS & gps, const gps_fix & fix) {

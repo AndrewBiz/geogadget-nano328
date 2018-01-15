@@ -398,8 +398,6 @@ public:
   // Usage:  gps_fix left, right;
   //         left |= right;  // explicit merge
 
-  // ANB TODO: maybe to merge dateTime despite validity...
-
   gps_fix & operator |=( const gps_fix & r )
   {
     // Replace /status/  only if the right is more "accurate".
@@ -407,7 +405,8 @@ public:
       status = r.status;
 
     #ifdef GPS_FIX_DATE
-      if (r.valid.date) {
+      // if (r.valid.date) {
+      if ((r.valid.date) || (!valid.date)) { // ANB tweak to save parsed values even if they ar not valid (replace old non-valid value)
         dateTime.date  = r.dateTime.date;
         dateTime.month = r.dateTime.month;
         dateTime.year  = r.dateTime.year;
@@ -415,13 +414,16 @@ public:
     #endif
 
     #ifdef GPS_FIX_TIME
-      if (r.valid.time) {
+      // if (r.valid.time) {
+      if ((r.valid.time) || (!valid.time)) { // ANB tweak to save parsed values even if they are not valid  (replace old non-valid value)
         dateTime.hours   = r.dateTime.hours;
         dateTime.minutes = r.dateTime.minutes;
         dateTime.seconds = r.dateTime.seconds;
         dateTime_cs      = r.dateTime_cs;
       }
     #endif
+
+    // ANB TODO: tweak all other fields like Date Time
 
     #ifdef GPS_FIX_LOCATION
       if (r.valid.location) {
