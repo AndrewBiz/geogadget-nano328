@@ -426,20 +426,23 @@ public:
     // ANB TODO: tweak all other fields like Date Time
 
     #ifdef GPS_FIX_LOCATION
-      if (r.valid.location) {
+      // if (r.valid.location) {
+      if ((r.valid.location) || (!valid.location)) {  // ANB tweak
         location = r.location;
       }
     #endif
 
     #ifdef GPS_FIX_LOCATION_DMS
-      if (r.valid.location) {
+      // if (r.valid.location) {
+      if ((r.valid.location) || (!valid.location)) {  // ANB tweak
         latitudeDMS  = r.latitudeDMS;
         longitudeDMS = r.longitudeDMS;
       }
     #endif
 
     #ifdef GPS_FIX_ALTITUDE
-      if (r.valid.altitude)
+      // if (r.valid.altitude)
+      if ((r.valid.altitude) || (!valid.altitude))   // ANB tweak
         alt = r.alt;
     #endif
 
@@ -454,7 +457,8 @@ public:
     #endif
 
     #ifdef GPS_FIX_SATELLITES
-      if (r.valid.satellites)
+      // if (r.valid.satellites)
+      if ((r.valid.satellites) || (!valid.satellites))  // ANB tweak
         satellites = r.satellites;
     #endif
 
@@ -474,17 +478,20 @@ public:
     #endif
 
     #ifdef GPS_FIX_LAT_ERR
-      if (r.valid.lat_err)
+      // if (r.valid.lat_err)
+      if ((r.valid.lat_err) || (!valid.lat_err))  // ANB tweak
         lat_err_cm = r.lat_err_cm;
     #endif
 
     #ifdef GPS_FIX_LON_ERR
-      if (r.valid.lon_err)
+      // if (r.valid.lon_err)
+      if ((r.valid.lon_err) || (!valid.lon_err)) //ANB tweak
         lon_err_cm = r.lon_err_cm;
     #endif
 
     #ifdef GPS_FIX_ALT_ERR
-      if (r.valid.alt_err)
+      // if (r.valid.alt_err)
+      if ((r.valid.alt_err) || (!valid.alt_err)) //ANB tweak
         alt_err_cm = r.alt_err_cm;
     #endif
 
