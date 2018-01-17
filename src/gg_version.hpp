@@ -3,7 +3,7 @@
 
 //======================================================================
 //  Program: gg.cpp - GeoGadget based on UBLOX GPS receiver
-#define GG_VERSION "0.9.5"
+#define GG_VERSION "0.9.6"
 //======================================================================
 
 #endif
