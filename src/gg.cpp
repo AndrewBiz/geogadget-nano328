@@ -37,12 +37,31 @@ void clear_display() {
 
 const uint8_t number_spin_steps = 8;
 const char spin_step[number_spin_steps] PROGMEM = {'|','/','-','\\','|','/','-','\\'};
+const char format_sta_sat[] PROGMEM = "ST %1d SAT: %02d(%02d)";
+const uint8_t SAT_GOOD_SNR = 20;
+
+void display_sta_sat(const NMEAGPS & gps, const gps_fix & fix) {
+  char _buf[17];
+  uint8_t sats_ok = 0;
+
+  for (uint8_t i=0; i < gps.sat_count; i++) {
+    if ((gps.satellites[i].tracked) && (gps.satellites[i].snr > SAT_GOOD_SNR)) {
+      sats_ok++;
+    }
+  }
+  sprintf_P(_buf, format_sta_sat,
+    fix.status,
+    sats_ok,
+    fix.satellites
+  );
+  u8x8.print(_buf);
+}
 
 void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   static uint32_t spin_phase_time = 0;
   static uint8_t spin_phase = 0;
 
-  char _buf[11];
+  char _buf[17];
 
   u8x8.setFont(u8x8_font_artossans8_r);
 
@@ -60,9 +79,9 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
     u8x8.print((char)pgm_read_byte(&(spin_step[spin_phase++])));
     if (spin_phase >= number_spin_steps) spin_phase = 0;
   }
+
   u8x8.setCursor(0, 4);
-  u8x8.print(F("STA: "));
-  u8x8.print(fix.status);
+  display_sta_sat(gps, fix);
 
   u8x8.setCursor(0, 5);
   if (not fix.valid.date) u8x8.setInverseFont(1);
@@ -90,15 +109,13 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
 }
 
 void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
-  char _buf[12];
+  char _buf[17];
 
   u8x8.setFont(u8x8_font_artossans8_r);
 
-  if (not fix.valid.status) u8x8.setInverseFont(1);
+  // if (not fix.valid.status) u8x8.setInverseFont(1);
   u8x8.setCursor(0, 0);
-  u8x8.print(F("STA: "));
-  u8x8.print(fix.status);
-  u8x8.setInverseFont(0);
+  display_sta_sat(gps, fix);
 
   u8x8.setCursor(0, 1);
   if (not fix.valid.date) u8x8.setInverseFont(1);

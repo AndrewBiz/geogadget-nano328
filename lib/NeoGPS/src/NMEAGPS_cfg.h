@@ -213,11 +213,11 @@
 // optionally, all the info for each satellite.
 //
 
-// #define NMEAGPS_PARSE_SATELLITES
-// #define NMEAGPS_PARSE_SATELLITE_INFO
+#define NMEAGPS_PARSE_SATELLITES
+#define NMEAGPS_PARSE_SATELLITE_INFO
 
 #ifdef NMEAGPS_PARSE_SATELLITES
-  #define NMEAGPS_MAX_SATELLITES (20)
+  #define NMEAGPS_MAX_SATELLITES (15)
 
   #ifndef GPS_FIX_SATELLITES
     #error GPS_FIX_SATELLITES must be defined in GPSfix.h!
