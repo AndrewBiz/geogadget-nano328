@@ -2,8 +2,10 @@
 #include <ublox/ubxGPS.h>
 #include <GPSport.h>
 #include <U8x8lib.h>
-#include <AltSoftSerial.h>
-#define GPS_PORT_NAME "AltSoftSerial(RX pin 8, TX pin 9)"
+// #include <AltSoftSerial.h>
+// #define GPS_PORT_NAME "AltSoftSerial(RX pin 8, TX pin 9)"
+#include <NeoICSerial.h>
+#define GPS_PORT_NAME "NeoICSerial(RX pin 8, TX pin 9)"
 #include <PinButton.h>
 
 #include "gg_version.hpp"
@@ -13,7 +15,8 @@
 #include "gg_sd.hpp"
 #include "gg_format.hpp"
 
-AltSoftSerial gpsPort;
+// AltSoftSerial gpsPort;
+NeoICSerial gpsPort; // 8 & 9 for an UNO
 
 const uint8_t modeButtonPin = 2;
 PinButton modeButton(modeButtonPin);
