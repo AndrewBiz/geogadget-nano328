@@ -2,8 +2,6 @@
 #include <ublox/ubxGPS.h>
 #include <GPSport.h>
 #include <U8x8lib.h>
-// #include <AltSoftSerial.h>
-// #define GPS_PORT_NAME "AltSoftSerial(RX pin 8, TX pin 9)"
 #include <NeoICSerial.h>
 #define GPS_PORT_NAME "NeoICSerial(RX pin 8, TX pin 9)"
 #include <PinButton.h>
@@ -39,9 +37,9 @@ const uint8_t number_spin_steps = 8;
 const char spin_step[number_spin_steps] PROGMEM = {'|','/','-','\\','|','/','-','\\'};
 const char format_sta_sat[] PROGMEM = "ST %1d SAT: %02d(%02d)";
 const uint8_t SAT_GOOD_SNR = 20;
+char _buf[17];
 
 void display_sta_sat(const NMEAGPS & gps, const gps_fix & fix) {
-  char _buf[17];
   uint8_t sats_ok = 0;
 
   for (uint8_t i=0; i < gps.sat_count; i++) {
@@ -57,18 +55,44 @@ void display_sta_sat(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.print(_buf);
 }
 
+void display_ymd(const NMEAGPS & gps, const gps_fix & fix) {
+
+  if (not fix.valid.date) u8x8.setInverseFont(1);
+  u8x8.print(F("YMD: "));
+  u8x8.print(
+    format_date( _buf, '.',
+      fix.dateTime.full_year(fix.dateTime.year),
+      fix.dateTime.month,
+      fix.dateTime.date
+    )
+  );
+  u8x8.setInverseFont(0);
+}
+
+void display_hms(const NMEAGPS & gps, const gps_fix & fix) {
+
+  if (not fix.valid.time) u8x8.setInverseFont(1);
+  u8x8.print(F("HMS: "));
+  u8x8.print(
+    format_time( _buf, ':',
+      fix.dateTime.hours,
+      fix.dateTime.minutes,
+      fix.dateTime.seconds
+    )
+  );
+  u8x8.setInverseFont(0);
+}
+
 void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   static uint32_t spin_phase_time = 0;
   static uint8_t spin_phase = 0;
 
-  char _buf[17];
-
   u8x8.setFont(u8x8_font_artossans8_r);
 
   u8x8.setCursor(0, 0);
-  u8x8.print(F("   Geo-Gadget   "));
+  u8x8.print(F("   Geo-Gadget"));
   u8x8.setCursor(0, 1);
-  u8x8.print(F("     v" GG_VERSION "     "));
+  u8x8.print(F("     v" GG_VERSION));
 
   u8x8.setCursor(0, 2);
   u8x8.print(F("getting signal "));
@@ -84,62 +108,24 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
   display_sta_sat(gps, fix);
 
   u8x8.setCursor(0, 5);
-  if (not fix.valid.date) u8x8.setInverseFont(1);
-  u8x8.print(F("YMD: "));
-  u8x8.print(
-    format_date( _buf, '.',
-      fix.dateTime.full_year(fix.dateTime.year),
-      fix.dateTime.month,
-      fix.dateTime.date
-    )
-  );
-  u8x8.setInverseFont(0);
+  display_ymd(gps, fix);
 
   u8x8.setCursor(0, 6);
-  if (not fix.valid.time) u8x8.setInverseFont(1);
-  u8x8.print(F("HMS: "));
-  u8x8.print(
-    format_time( _buf, ':',
-      fix.dateTime.hours,
-      fix.dateTime.minutes,
-      fix.dateTime.seconds
-    )
-  );
-  u8x8.setInverseFont(0);
+  display_hms(gps, fix);
 }
 
 void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
-  char _buf[17];
 
   u8x8.setFont(u8x8_font_artossans8_r);
 
-  // if (not fix.valid.status) u8x8.setInverseFont(1);
   u8x8.setCursor(0, 0);
   display_sta_sat(gps, fix);
 
   u8x8.setCursor(0, 1);
-  if (not fix.valid.date) u8x8.setInverseFont(1);
-  u8x8.print(F("YMD: "));
-  u8x8.print(
-    format_date( _buf, '.',
-      fix.dateTime.full_year(fix.dateTime.year),
-      fix.dateTime.month,
-      fix.dateTime.date
-    )
-  );
-  u8x8.setInverseFont(0);
+  display_ymd(gps, fix);
 
   u8x8.setCursor(0, 2);
-  if (not fix.valid.time) u8x8.setInverseFont(1);
-  u8x8.print(F("HMS: "));
-  u8x8.print(
-    format_time( _buf, ':',
-      fix.dateTime.hours,
-      fix.dateTime.minutes,
-      fix.dateTime.seconds
-    )
-  );
-  u8x8.setInverseFont(0);
+  display_hms(gps, fix);
 
   if (not fix.valid.location || fix.status == gps_fix::STATUS_NONE)
     u8x8.setInverseFont(1);
@@ -205,10 +191,10 @@ void setup() {
 
   u8x8.begin();
 
-  DEBUG_PORT.println(F("Geo-Gadget v" GG_VERSION));
+  D(DEBUG_PORT.println(F("Geo-Gadget v" GG_VERSION));)
   D(DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';)
   D(DEBUG_PORT << F("GPS object size = ") << sizeof(gps) << '\n';)
-  DEBUG_PORT.flush();
+  D(DEBUG_PORT.flush();)
 
   // GPS device initializing
   gpsPort.begin(9600);
