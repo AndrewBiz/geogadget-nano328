@@ -132,8 +132,8 @@ void setup_sd(const NMEAGPS &gps, const gps_fix &fix) {
   }
   create_file(fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
 
-  DEBUG_PORT.print(F("Logging to: "));
-  DEBUG_PORT.print(gg_dir_name);
-  DEBUG_PORT.print(F("/"));
-  DEBUG_PORT.println(gg_file_name);
+  D(DEBUG_PORT.print(F("Logging to: "));)
+  D(DEBUG_PORT.print(gg_dir_name);)
+  D(DEBUG_PORT.print(F("/"));)
+  D(DEBUG_PORT.println(gg_file_name);)
 }
