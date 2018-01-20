@@ -4,17 +4,28 @@
 #include <NeoGPS_cfg.h>
 #include <ublox/ubxGPS.h>
 #include <GPSport.h>
-D(#include <Streamers.h>)
 
 const unsigned int ACQ_DOT_INTERVAL = 500UL;
 
 //--------------------------
-GPS::GPS(Stream * device) : ubloxGPS(device) {
-  state = GETTING_STATUS;
+GPS::GPS(Stream* device) : ubloxGPS(device) {
+  state = GETTING_SIGNAL;
 }
 
 //--------------------------
 void GPS::start_running() {
+  // disabling NMEA 'spam'
+  for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
+    ublox::configNMEA( *this, (NMEAGPS::nmea_msg_t) i, 0 );
+  }
+  // initially disabling all messages
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_STATUS);
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS);
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC);
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_VELNED);
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_POSLLH);
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_DOP);
+  disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_SVINFO);
 
   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS )){
     D(DEBUG_PORT.println(F("enable UBX_NAV_STATUS failed!"));)
@@ -65,68 +76,23 @@ void GPS::start_running() {
     }
   #endif
 
-  state = GETTING_STATUS;
-  // state = RUNNING;
+  state = GETTING_SIGNAL;
 } // start_running
 
 //--------------------------
-void GPS::get_status() {
-  static bool acquiring = false;
-
-  if (fix().status == gps_fix::STATUS_NONE) {
-    static uint32_t dotPrint;
-
-    if (!acquiring) {
-      acquiring = true;
-      dotPrint = millis();
-      D(DEBUG_PORT.print(F("Getting STATUS..."));)
-    } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
-      dotPrint = millis();
-      DEBUG_PORT.print(F("."));
-    }
-
-  } else {
-    D(if (acquiring) DEBUG_PORT << '\n';)
-    D(DEBUG_PORT << F("Acquired status: ") << (uint8_t) fix().status << '\n';)
-    state = GETTING_UTC;
-  }
-} // get_status
-
-//--------------------------
-// void GPS::get_leap_seconds() {
-//   static bool acquiring = false;
-//   static uint32_t dotPrint;
-//
-//   if (GPSTime::leap_seconds != 0) {
-//     if (acquiring) DEBUG_PORT << '\n';
-//     DEBUG_PORT << F("Acquired leap seconds: ") << GPSTime::leap_seconds << '\n';
-//     state = GETTING_UTC;
-//   } else {
-//     if (!acquiring) {
-//       acquiring = true;
-//       dotPrint = millis();
-//       DEBUG_PORT.print(F("Getting leap seconds..."));
-//     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
-//       dotPrint = millis();
-//       DEBUG_PORT << '.';
-//     }
-//   }
-// } // get_leap_seconds
-
-//--------------------------
-void GPS::get_utc() {
+void GPS::get_signal() {
   static bool acquiring = false;
   static uint32_t dotPrint;
 
   lock();
-  bool            safe = is_safe();
-  NeoGPS::clock_t sow  = GPSTime::start_of_week();
-  D(NeoGPS::time_t  utc  = fix().dateTime;)
+  bool              safe = is_safe();
+  NeoGPS::clock_t   sow  = GPSTime::start_of_week();
+  gps_fix::status_t status = fix().status;
   unlock();
 
-  if (safe && (sow != 0)) {
+  if (safe && (sow != 0) && (status != gps_fix::STATUS_NONE)) {
     D(if (acquiring) DEBUG_PORT << '\n';)
-    D(DEBUG_PORT << F("Acquired UTC: ") << utc << '\n';)
+    D(DEBUG_PORT << F("Acquired Satus: ") << status << '\n';)
     D(DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';)
     // go to running state
     state = RUNNING;
@@ -134,20 +100,19 @@ void GPS::get_utc() {
     if (!acquiring) {
       acquiring = true;
       dotPrint = millis();
-      DEBUG_PORT.print(F("Getting UTC..."));
+      D(DEBUG_PORT.print(F("Getting signal..."));)
     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
       dotPrint = millis();
       DEBUG_PORT.print(F("."));
     }
   }
-} // get_utc
+} // get_signal
+
 
 //--------------------------
 bool GPS::running() {
   switch (state) {
-    case GETTING_STATUS      : get_status      (); break;
-    // case GETTING_LEAP_SECONDS: get_leap_seconds(); break;
-    case GETTING_UTC         : get_utc         (); break;
+    case GETTING_SIGNAL      : get_signal      (); break;
   }
   return (state == RUNNING);
 } // running

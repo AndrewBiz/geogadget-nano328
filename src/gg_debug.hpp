@@ -5,6 +5,7 @@
 #include <GPSport.h>
 
 #ifdef DEBUG
+#  include <Streamers.h>
 #  define D(x) x
 #else
 #  define D(x)

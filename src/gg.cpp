@@ -60,7 +60,7 @@ void display_ymd(const NMEAGPS & gps, const gps_fix & fix) {
   if (not fix.valid.date) u8x8.setInverseFont(1);
   u8x8.print(F("YMD: "));
   u8x8.print(
-    format_date( _buf, '.',
+    format_date( _buf, '-',
       fix.dateTime.full_year(fix.dateTime.year),
       fix.dateTime.month,
       fix.dateTime.date
@@ -89,13 +89,13 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
 
   u8x8.setFont(u8x8_font_artossans8_r);
 
-  u8x8.setCursor(0, 0);
-  u8x8.print(F("   Geo-Gadget"));
-  u8x8.setCursor(0, 1);
-  u8x8.print(F("     v" GG_VERSION));
+  u8x8.setCursor(3, 0);
+  u8x8.print(F("Geo-Gadget"));
+  u8x8.setCursor(5, 1);
+  u8x8.print(F("v" GG_VERSION));
 
   u8x8.setCursor(0, 2);
-  u8x8.print(F("getting signal "));
+  u8x8.print(F("getting signal"));
   u8x8.setCursor(15, 2);
   if (millis() - spin_phase_time > 100) {
     // spin phases clockwise: "|/-\|/-\"
@@ -164,26 +164,6 @@ void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
 }
 
 //--------------------------
-// TODO: move to gg_gps
-static void configNMEA(uint8_t val) {
-  for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
-    ublox::configNMEA( gps, (NMEAGPS::nmea_msg_t) i, val );
-  }
-}
-
-//--------------------------
-// TODO: move to gg_gps
-static void disableUBX() {
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS );
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS );
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC );
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_VELNED );
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_POSLLH );
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_DOP );
-  gps.disable_msg( ublox::UBX_NAV, ublox::UBX_NAV_SVINFO );
-}
-
-//--------------------------
 void setup() {
   DEBUG_PORT.begin(9600);
   while (!DEBUG_PORT)
@@ -199,9 +179,6 @@ void setup() {
   // GPS device initializing
   gpsPort.begin(9600);
   D(DEBUG_PORT.println(F("Looking for GPS device on " GPS_PORT_NAME));)
-  // TODO: put to start_running:
-  configNMEA(0);
-  disableUBX();
 
   gps.start_running();
   bool running = false;
@@ -211,7 +188,7 @@ void setup() {
       running = gps.running();
     }
     displaydata_init(gps, fix);
-    // _dumpPort(gpsPort, DEBUG_PORT, 1500);
+    // _dumpPort(gpsPort, DEBUG_PORT, 1200);
   } while (not running);
 
   // SD card initializing

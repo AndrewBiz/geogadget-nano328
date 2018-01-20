@@ -2,14 +2,12 @@
 #include <Arduino.h>
 
 const char format_date_solid[] PROGMEM = "%04d%02d%02d";
-const char format_date_dot[] PROGMEM =   "%04d.%02d.%02d";
 const char format_date_dash[] PROGMEM =  "%04d-%02d-%02d";
 
 //--------------------------
 char* format_date(char* buf, char ftype, uint16_t year, uint8_t month, uint8_t date) {
   const char* _fmt;
   switch (ftype) {
-    case '.': _fmt = format_date_dot; break;
     case '-': _fmt = format_date_dash; break;
     default : _fmt = format_date_solid; break;
   }
