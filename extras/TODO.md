@@ -10,5 +10,6 @@
 - [ ] upgrade to GPX 1.1
 - [ ] add header info to GPX (Geo-Gadged, version, url)
 - [ ] do  SD card init message (like in NMEASDLOG.ino)
+- [ ] make parsing UBX-NAV-PVT instead all other tags
 - [ ] to understand: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
