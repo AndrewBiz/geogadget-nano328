@@ -127,36 +127,35 @@ void displaydata(const NMEAGPS & gps, const gps_fix & fix) {
   u8x8.setCursor(0, 2);
   display_hms(gps, fix);
 
+  u8x8.setCursor(0, 3);
   if (not fix.valid.location || fix.status == gps_fix::STATUS_NONE)
     u8x8.setInverseFont(1);
-  u8x8.setCursor(0, 3);
   u8x8.print(F("LAT: "));
-  dtostrf(fix.latitude(), 11, 6, _buf);  /* 11 width, 6 precision */
-  u8x8.print(_buf);
+  u8x8.print(format_location(_buf, fix.latitudeL()));
 
   u8x8.setCursor(0, 4);
   u8x8.print(F("LON: "));
-  dtostrf(fix.longitude(), 11, 6, _buf);  /* 11 width, 6 precision */
+  u8x8.print(format_location(_buf, fix.longitudeL()));
+  u8x8.setInverseFont(0);
+
+  u8x8.setCursor(0, 5);
+  if (not fix.valid.altitude) u8x8.setInverseFont(1);
+  static const char fmt_dsp_alt[] PROGMEM = "ALT: %+6d m";
+  sprintf_P(_buf,
+    fmt_dsp_alt,
+    int(fix.altitude())
+  );
   u8x8.print(_buf);
   u8x8.setInverseFont(0);
 
-  if (not fix.valid.altitude) u8x8.setInverseFont(1);
-  u8x8.clearLine(5);
-  u8x8.setCursor(0, 5);
-  u8x8.print(F("ALT: "));
-  u8x8.print(int(trunc(fix.altitude())));
-  u8x8.print(F(" m"));
-  u8x8.setInverseFont(0);
-
-  u8x8.clearLine(6);
   u8x8.setCursor(0, 6);
-  u8x8.print(F("ERR: "));
-  u8x8.print(int(trunc(fix.lat_err())));
-  u8x8.print(F(","));
-  u8x8.print(int(trunc(fix.lon_err())));
-  u8x8.print(F(","));
-  u8x8.print(int(trunc(fix.alt_err())));
-  u8x8.print(F(" m"));
+  static const char fmt_dsp_err[] PROGMEM = "ERR: %4d,%4d m";
+  sprintf_P(_buf,
+    fmt_dsp_err,
+    int(fix.lat_err()),
+    int(fix.alt_err())
+  );
+  u8x8.print(_buf);
 
   u8x8.setCursor(0, 7);
   u8x8.print(F("LOG: "));

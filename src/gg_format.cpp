@@ -36,3 +36,34 @@ char* format_time(char* buf, char ftype, uint8_t hours, uint8_t minutes, uint8_t
   );
   return buf;
 }
+
+//----Location format section ---------------------
+const int32_t location_SCALE = 10000000L;
+
+int location_whole(int32_t val) {
+    return (int) (val / location_SCALE);
+}
+
+unsigned long location_frac(int32_t val) {
+    return (unsigned long) ((val % location_SCALE) / 10);
+}
+
+const char fmt_location_int32_p[] PROGMEM =  "+%03d.%06lu";
+const char fmt_location_int32_n[] PROGMEM =  "-%03d.%06lu";
+
+//--------------------------
+char* format_location(char* buf, int32_t val) {
+  const char* _fmt;
+  if (val >= 0) {
+    _fmt = fmt_location_int32_p;
+  } else {
+    _fmt = fmt_location_int32_n;
+    val = -val;
+  }
+  sprintf_P(buf,
+    _fmt,
+    location_whole(val),
+    location_frac(val)
+  );
+  return buf;
+}
