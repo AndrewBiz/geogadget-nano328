@@ -85,9 +85,11 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   gg_file.print(F("\t\t<trkpt "));
 
   gg_file.print(F("lat=\""));
-  gg_file.print(fix.latitude(), 6);
+  gg_file.print(format_location(_buf, fix.latitudeL()));
+  // gg_file.print(fix.latitude(), 6);
   gg_file.print(F("\" lon=\""));
-  gg_file.print(fix.longitude(), 6);
+  gg_file.print(format_location(_buf, fix.longitudeL()));
+  // gg_file.print(fix.longitude(), 6);
   gg_file.print(F("\">"));
 
   gg_file.print(F("<time>"));
@@ -111,7 +113,7 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
 
   // TODO: avoid printing bad elevation data
   gg_file.print(F("<ele>")); // meters
-  gg_file.print(fix.altitude(), 2);
+  gg_file.print((int) fix.altitude());
   gg_file.print(F("</ele>"));
   gg_file.print(F("</trkpt>\n"));
   gg_file.print(F(GPX_ENDING));
