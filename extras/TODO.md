@@ -13,3 +13,4 @@
 - [ ] make parsing UBX-NAV-PVT instead all other tags
 - [ ] to understand: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
+- [ ] make program reset the device after 25 minutesof work - to avoid hangings
