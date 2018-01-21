@@ -19,6 +19,9 @@ NeoICSerial gpsPort; // 8 & 9 for an UNO
 const uint8_t modeButtonPin = 2;
 PinButton modeButton(modeButtonPin);
 
+const uint16_t  NORMAL_RATE = 5000; //ms = 1 tick per 5 sec
+const uint16_t  FAST_RATE = 1000;   //ms = 1 tick per 1 sec = 1Hz
+
 static GPS gps(&gpsPort);
 static gps_fix fix;
 
@@ -91,7 +94,7 @@ void displaydata_init(const NMEAGPS & gps, const gps_fix & fix) {
 
   u8x8.setCursor(3, 0);
   u8x8.print(F("Geo-Gadget"));
-  u8x8.setCursor(5, 1);
+  u8x8.setCursor(4, 1);
   u8x8.print(F("v" GG_VERSION));
 
   u8x8.setCursor(0, 2);
@@ -189,6 +192,8 @@ void setup() {
     displaydata_init(gps, fix);
     // _dumpPort(gpsPort, DEBUG_PORT, 1200);
   } while (not running);
+  // set 1 per 5 sec rate (5000ms)
+  gps.set_rate(NORMAL_RATE);
 
   // SD card initializing
   setup_sd(gps, fix);

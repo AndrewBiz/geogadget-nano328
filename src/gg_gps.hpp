@@ -15,6 +15,8 @@ public:
   } state NEOGPS_BF(8);
 
   GPS(Stream*);
+  
+  bool set_rate(uint16_t rate);
   void start_running(void);
   bool running(void);
 

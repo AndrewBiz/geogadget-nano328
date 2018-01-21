@@ -13,7 +13,18 @@ GPS::GPS(Stream* device) : ubloxGPS(device) {
 }
 
 //--------------------------
+bool GPS::set_rate(uint16_t rate) {
+  return send(ublox::cfg_rate_t(rate, 1, ublox::UBX_TIME_REF_UTC));
+}
+
+//--------------------------
 void GPS::start_running() {
+  // set 1Hz rate (1000ms)
+  if (!set_rate(1000)) {
+    D(DEBUG_PORT.println(F("set rate FAILED!"));)
+  } else {
+    D(DEBUG_PORT.println(F("set rate OK"));)
+  }
   // disabling NMEA 'spam'
   for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
     ublox::configNMEA( *this, (NMEAGPS::nmea_msg_t) i, 0 );
@@ -112,7 +123,7 @@ void GPS::get_signal() {
 //--------------------------
 bool GPS::running() {
   switch (state) {
-    case GETTING_SIGNAL      : get_signal      (); break;
+    case GETTING_SIGNAL : get_signal(); break;
   }
   return (state == RUNNING);
 } // running

@@ -13,3 +13,4 @@
 |28558 |1682 | replace sdfat.print float with custom location format
 |28126!|1670 | remove sdfat.print float with print int 420! bytes
 |27702!|--   | replace display print(F) with sprintf_P, remove clearLine 424! bytes
+|27798 |--   | added cfg_rate call
