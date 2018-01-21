@@ -15,3 +15,4 @@
 |27702!|--   | replace display print(F) with sprintf_P, remove clearLine 424! bytes
 |27798 |--   | added cfg_rate call
 |27794 |--   | refactor initializing cfg_rate_t
+|27958 |--   | added main state machine

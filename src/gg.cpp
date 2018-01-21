@@ -19,6 +19,13 @@ NeoICSerial gpsPort; // 8 & 9 for an UNO
 const uint8_t modeButtonPin = 2;
 PinButton modeButton(modeButtonPin);
 
+enum gg_mode_t {LOGGING_DISPLAY, TO_LOGGING_NORMAL, LOGGING_NORMAL, TO_LOGGING_DISPLAY};
+enum gg_mode_t gg_mode = TO_LOGGING_DISPLAY; //The current mode
+
+// unsigned long timeNow = 0;
+// unsigned long timePrevious = 0;
+// const unsigned int interval = 200;
+
 const uint16_t  NORMAL_RATE = 5000; //ms = 1 tick per 5 sec
 const uint16_t  FAST_RATE = 1000;   //ms = 1 tick per 1 sec = 1Hz
 
@@ -192,33 +199,75 @@ void setup() {
     displaydata_init(gps, fix);
     // _dumpPort(gpsPort, DEBUG_PORT, 1200);
   } while (not running);
-  // set 1 per 5 sec rate (5000ms)
-  gps.set_rate(NORMAL_RATE);
 
   // SD card initializing
   setup_sd(gps, fix);
 
   D(trace_header(DEBUG_PORT);)
-  clear_display();
+  gg_mode = TO_LOGGING_DISPLAY;
 }
 
 //--------------------------
 void loop() {
+  // timeNow = millis();
   modeButton.update();
-  if (modeButton.isSingleClick()) {
-    display_is_sleeping = !display_is_sleeping;
-    if (display_is_sleeping) {
-      u8x8.setPowerSave(1); //activates power save
-    } else {
-      u8x8.setPowerSave(0); //deactivates power save
-    }
-  }
+
+//   switch (gg_mode) {
+//
+//     case LOGGING_DISPLAY:
+// DEBUG_PORT.println(F("Enter LOGGING_DISPLAY"));
+//       if (gps.available(gpsPort)) {
+//         fix = gps.read();
+//         displaydata(gps, fix);
+//         log_fix(gps, fix);
+//       }
+//       if (modeButton.isSingleClick()) {
+//         gg_mode = TO_LOGGING_NORMAL;
+//       }
+//       break;
+//
+//     case TO_LOGGING_NORMAL:
+// DEBUG_PORT.println(F("Enter TO_LOGGING_NORMAL"));
+//       gps.set_rate(NORMAL_RATE);
+//       u8x8.setPowerSave(1); //activates power save on display
+//       gg_mode = LOGGING_NORMAL;
+//       break;
+//
+//     case LOGGING_NORMAL:
+// DEBUG_PORT.println(F("Enter LOGGING_NORMAL"));
+//       if (gps.available(gpsPort)) {
+//         fix = gps.read();
+//         log_fix(gps, fix);
+//       }
+//       if (modeButton.isSingleClick()) {
+//         gg_mode = TO_LOGGING_DISPLAY;
+//       }
+//       break;
+//
+//     case TO_LOGGING_DISPLAY:
+// DEBUG_PORT.println(F("Enter TO_LOGGING DISPLAY"));
+//       gps.set_rate(FAST_RATE);  // 1Hz normally
+//       u8x8.setPowerSave(0); //deactivates power save on display
+//       clear_display();
+//       gg_mode = LOGGING_DISPLAY;
+//       break;
+//
+//     default:
+//       break;
+//   }
+
+  // if (modeButton.isSingleClick()) {
+  //   display_is_sleeping = !display_is_sleeping;
+  //   if (display_is_sleeping) {
+  //     u8x8.setPowerSave(1); //activates power save
+  //   } else {
+  //     u8x8.setPowerSave(0); //deactivates power save
+  //   }
+  // }
   if (gps.available(gpsPort)) {
     fix = gps.read();
-    D(trace_all(DEBUG_PORT, gps, fix);)
-
+    // D(trace_all(DEBUG_PORT, gps, fix);)
     displaydata(gps, fix);
-
     log_fix(gps, fix);
   }
 }
