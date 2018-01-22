@@ -9,8 +9,8 @@
 - [ ] do sd.sync every 10 secs (its too expensive operation)
 - [ ] upgrade to GPX 1.1
 - [ ] add header info to GPX (Geo-Gadged, version, url)
-- [ ] do  SD card init message (like in NMEASDLOG.ino)
+- [ ] do SD card init message (like in NMEASDLOG.ino)
 - [ ] make parsing UBX-NAV-PVT instead all other tags
-- [ ] to understand: ```
+- [ ] to understand how it works: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
 - [ ] make program reset the device after 25 minutesof work - to avoid hangings
