@@ -13,7 +13,6 @@
 #include "gg_sd.hpp"
 #include "gg_format.hpp"
 
-// AltSoftSerial gpsPort;
 NeoICSerial gpsPort; // 8 & 9 for an UNO
 
 const uint8_t modeButtonPin = 2;
