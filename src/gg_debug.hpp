@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <GPSport.h>
+// #include <MemoryFree.h>
+// DEBUG_PORT.print(F("FM=")); DEBUG_PORT.println(freeMemory());
 
 #ifdef DEBUG
 #  include <Streamers.h>

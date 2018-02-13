@@ -79,17 +79,15 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
 //--------------------------
 // Log a data record to SD card file
 void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
-  char _buf[11];
+  char _buf[15];
   //TODO replace with seekEND
   gg_file.seekSet(gg_file.fileSize() + GPX_ENDING_OFFSET);
   gg_file.print(F("\t\t<trkpt "));
 
   gg_file.print(F("lat=\""));
   gg_file.print(format_location(_buf, fix.latitudeL()));
-  // gg_file.print(fix.latitude(), 6);
   gg_file.print(F("\" lon=\""));
   gg_file.print(format_location(_buf, fix.longitudeL()));
-  // gg_file.print(fix.longitude(), 6);
   gg_file.print(F("\">"));
 
   gg_file.print(F("<time>"));
