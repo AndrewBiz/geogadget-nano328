@@ -303,7 +303,7 @@ bool ubloxGPS::wait_for_ack()
 
       if (rx_chars) {
         //  If chars were received, decrease idle_time by the
-        //    number of character times (TODO: use current baud rate)
+        //    number of character times (TODO1: use current baud rate)
 
         const uint16_t ms_per_charE5 = ((10UL * 1000) << 5) / 9600UL;
         uint16_t rx_char_time = (rx_chars * ms_per_charE5) >> 5;

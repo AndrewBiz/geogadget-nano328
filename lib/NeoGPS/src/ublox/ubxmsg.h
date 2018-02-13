@@ -176,7 +176,7 @@ namespace ublox {
     struct cfg_rate_t : msg_t {
         uint16_t        GPS_meas_rate;
         uint16_t        nav_rate;
-        enum time_ref_t time_ref:16;  //!!! TODO how it works!?
+        enum time_ref_t time_ref:16;  //!!! TODO ANB how it works!?
 
         cfg_rate_t( uint16_t gr, uint16_t nr, enum time_ref_t tr ) :
           msg_t( UBX_CFG, UBX_CFG_RATE, UBX_MSG_LEN(*this) ), // !!! ANB refactor initialization part

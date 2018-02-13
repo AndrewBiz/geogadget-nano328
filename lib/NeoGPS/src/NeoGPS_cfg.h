@@ -10,7 +10,7 @@
  * Disabling packed data structures will be very portable to other
  * platforms.  NeoGPS configurations will use slightly more RAM, and on
  * 8-bit AVRs, the speed is slightly slower, and the code is slightly
- * larger.  There may be no choice but to disable packing on processors 
+ * larger.  There may be no choice but to disable packing on processors
  * that do not support packed structures.
  *
  * There may also be compiler-specific switches that affect packing and the
@@ -27,7 +27,7 @@
 
 #ifdef NEOGPS_PACKED_DATA
 
-  // This is for specifying the number of bits to be used for a 
+  // This is for specifying the number of bits to be used for a
   // member of a struct.  Booleans are typically one bit.
   #define NEOGPS_BF(b) :b
 
@@ -51,7 +51,7 @@
  *  collisions with #define names, and allows the compiler to perform more
  *  checks on their usage.
  *
- *  Until C++ 10 and IDE 1.6.8, initialized class data constants 
+ *  Until C++ 10 and IDE 1.6.8, initialized class data constants
  *  were declared like this:
  *
  *      static const <valued types> = <constant-value>;
@@ -65,8 +65,8 @@
  *  The bad news is that it introduces a new language keyword, and the old
  *  code raises an error.
  *
- *  TODO: Evaluate the requirement for the "static" keyword.
- *  TODO: Evaluate using a C++ version preprocessor symbol for the #if.
+ *  TODO1: Evaluate the requirement for the "static" keyword.
+ *  TODO1: Evaluate using a C++ version preprocessor symbol for the #if.
  *
  *  The CONST_CLASS_DATA define will expand to the appropriate keywords.
  *
@@ -75,11 +75,11 @@
 #if ARDUINO < 10606
 
   #define CONST_CLASS_DATA static const
-  
+
 #else
 
   #define CONST_CLASS_DATA static constexpr
-  
+
 #endif
 
 #endif

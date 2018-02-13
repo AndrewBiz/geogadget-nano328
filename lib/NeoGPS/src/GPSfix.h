@@ -423,7 +423,7 @@ public:
       }
     #endif
 
-    // ANB TODO: tweak all other fields like Date Time
+    // TODO: ANB tweak all other fields like Date Time
 
     #ifdef GPS_FIX_LOCATION
       // if (r.valid.location) {
