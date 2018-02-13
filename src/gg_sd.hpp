@@ -1,7 +1,5 @@
-#include <Arduino.h>
-
-// Log file base name.  Must be six characters or less.
-#define FILE_BASE_NAME "GGTRK"
+#include <stdint.h>
+#include "gg_cfg.hpp"
 
 class NMEAGPS;
 class gps_fix;

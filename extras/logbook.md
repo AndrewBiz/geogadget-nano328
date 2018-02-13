@@ -16,3 +16,5 @@
 |27798 |--   | added cfg_rate call
 |27794 |--   | refactor initializing cfg_rate_t
 |27954 |--   | added main state machine
+|27864 |1702 | refactored display to sep file
+|27967 |1685 | put _buf inside functions
