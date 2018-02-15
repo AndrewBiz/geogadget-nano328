@@ -18,3 +18,5 @@
 |27954 |--   | added main state machine
 |27864 |1702 | refactored display to sep file
 |27976 |1685 | put _buf inside functions
+|27948 |1653 | refactored to Class GG_Display
+|-     |-    | no effect after put to inline and to hpp!!

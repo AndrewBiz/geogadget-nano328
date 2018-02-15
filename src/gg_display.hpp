@@ -1,28 +1,30 @@
 #ifndef GG_DISPLAY_HPP
 #define GG_DISPLAY_HPP
 
+#include <U8x8lib.h>
 #include <ublox/ubxGPS.h>
 #include "gg_debug.hpp"
 
 
 /*****************************************************************************
-   Display in diff modes
+   Display Class
 *****************************************************************************/
-// TODO: inline functions
-// static inline void init_display();
-// static inline void clear_display();
-// static inline void display_sleep();
-// static inline void display_wakeup();
+class GG_Display {
+public:
+  void init();
+  void clear();
+  void sleep();
+  void wakeup();
 
-void init_display();
-void clear_display();
-void display_sleep();
-void display_wakeup();
+  void show_init_screen(const NMEAGPS & gps, const gps_fix & fix);
+  void show_main_screen(const NMEAGPS & gps, const gps_fix & fix, char* gg_file_name);
 
+private:
+  U8X8_SSD1306_128X64_NONAME_HW_I2C _display;
 
-void display_sta_sat(const NMEAGPS & gps, const gps_fix & fix);
-void display_hms(const NMEAGPS & gps, const gps_fix & fix);
-void displaydata_init(const NMEAGPS & gps, const gps_fix & fix);
-void displaydata(const NMEAGPS & gps, const gps_fix & fix, char* gg_file_name);
+  void _sta_sat(const NMEAGPS & gps, const gps_fix & fix);
+  void _ymd(const NMEAGPS & gps, const gps_fix & fix);
+  void _hms(const NMEAGPS & gps, const gps_fix & fix);
+};
 
 #endif
