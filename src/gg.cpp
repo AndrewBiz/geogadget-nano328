@@ -16,6 +16,8 @@
 
 NeoICSerial gpsPort; // 8 & 9 for an UNO
 
+GG_Display display;
+
 const uint8_t modeButtonPin = 2;
 PinButton modeButton(modeButtonPin);
 
@@ -28,7 +30,7 @@ static gps_fix fix;
 void setup() {
   D(DEBUG_PORT.begin(9600);)
 
-  init_display();
+  display.init();
 
   D(DEBUG_PORT.println(F("Geo-Gadget v" GG_VERSION));)
   D(DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';)
@@ -46,7 +48,7 @@ void setup() {
       fix = gps.read();
       running = gps.running();
     }
-    displaydata_init(gps, fix);
+    display.show_init_screen(gps, fix);
     // _dumpPort(gpsPort, DEBUG_PORT, 1200);
   } while (not running);
 
@@ -65,7 +67,7 @@ void loop() {
     case Mode::LOGGING_DISPLAY:
       if (gps.available(gpsPort)) {
         fix = gps.read();
-        displaydata(gps, fix, gg_file_name);
+        display.show_main_screen(gps, fix, gg_file_name);
         log_fix(gps, fix);
       }
       if (modeButton.isSingleClick()) {
@@ -75,7 +77,7 @@ void loop() {
 
     case Mode::TO_LOGGING_NORMAL:
       gps.set_rate(NORMAL_RATE);
-      display_sleep();
+      display.sleep();
       mode = Mode::LOGGING_NORMAL;
       break;
 
@@ -91,8 +93,8 @@ void loop() {
 
     case Mode::TO_LOGGING_DISPLAY:
       gps.set_rate(FAST_RATE);  // 1Hz normally
-      display_wakeup();
-      clear_display();
+      display.wakeup();
+      display.clear();
       mode = Mode::LOGGING_DISPLAY;
       break;
 
