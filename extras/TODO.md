@@ -4,8 +4,10 @@
 - [x] refactor to use FormatDate and FormatTime functions
 - [x] use alt NeoSerial lib
 - [x] add SATs info (starting screen, operation screen)
-- [ ] init gps device: 1fix per 10 sec, power save mode
-- [ ] implement sleep_mode (like in OpenLog project)
+- [x] green gg: 1fix per xx (5-10 sec) in normal mode
+- [ ] green gg: power save mode of GPS device: cyclyc tracking
+- [ ] green gg: minimal LED flashing via UBX-CFG start_running
+- [ ] green gg: implement sleep_mode (like in OpenLog project), wake up via UART OR Button press
 - [ ] do sd.sync every 10 secs (its too expensive operation)
 - [ ] upgrade to GPX 1.1
 - [ ] add header info to GPX (Geo-Gadged, version, url)
