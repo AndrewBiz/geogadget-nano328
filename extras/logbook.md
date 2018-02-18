@@ -20,3 +20,5 @@
 |27976 |1685 | put _buf inside functions
 |27948 |1653 | refactored to Class GG_Display
 |-     |-    | no effect after put to inline and to hpp!!
+|27956 |1689 | branch GPS-power-save started
+|28206 |1721 | added go_power_max and go_power_save for GPS device

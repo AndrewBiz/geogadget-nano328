@@ -14,8 +14,6 @@
 #include "gg_format.hpp"
 #include "gg_display.hpp"
 
-NeoICSerial gpsPort; // 8 & 9 for an UNO
-
 GG_Display display;
 
 const uint8_t modeButtonPin = 2;
@@ -23,6 +21,7 @@ PinButton modeButton(modeButtonPin);
 
 enum class Mode : uint8_t {LOGGING_DISPLAY, TO_LOGGING_NORMAL, LOGGING_NORMAL, TO_LOGGING_DISPLAY} mode;
 
+NeoICSerial gpsPort; // 8 & 9 for an UNO
 static GPS gps(&gpsPort);
 static gps_fix fix;
 
@@ -77,6 +76,7 @@ void loop() {
 
     case Mode::TO_LOGGING_NORMAL:
       gps.set_rate(NORMAL_RATE);
+      gps.go_power_save();
       display.sleep();
       mode = Mode::LOGGING_NORMAL;
       break;
@@ -93,6 +93,7 @@ void loop() {
 
     case Mode::TO_LOGGING_DISPLAY:
       gps.set_rate(FAST_RATE);  // 1Hz normally
+      gps.go_power_max();
       display.wakeup();
       display.clear();
       mode = Mode::LOGGING_DISPLAY;
