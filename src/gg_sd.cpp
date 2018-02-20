@@ -1,3 +1,4 @@
+#include "gg_cfg.hpp"
 #include "gg_debug.hpp"
 #include "gg_sd.hpp"
 #include "gg_gps.hpp"
@@ -80,6 +81,28 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
 // Log a data record to SD card file
 void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   char _buf[15];
+  NeoGPS::clock_t ts_nofix_detected = 0;
+  NeoGPS::clock_t ts_current = fix.dateTime;
+  bool nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
+
+  // checks if fix is ok to be recorded
+  if (nofix) {
+    if(ts_nofix_detected > 0) {
+      // checking if it is high time to record to the log
+      if((ts_current - ts_nofix_detected) < NOFIX_LOGGING_INTERVAL) {
+        return;   // exit with no logging to SD card
+      } else {
+        ts_nofix_detected = ts_current;
+        // go log it!
+      }
+    } else {
+      ts_nofix_detected = ts_current;
+      return;  // exit with no logging to SD card
+    }
+  } else {  // location is valid
+    ts_nofix_detected = 0;
+  }
+
   //TODO replace with seekEND
   gg_file.seekSet(gg_file.fileSize() + GPX_ENDING_OFFSET);
   gg_file.print(F("\t\t<trkpt "));
@@ -89,6 +112,14 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   gg_file.print(F("\" lon=\""));
   gg_file.print(format_location(_buf, fix.longitudeL()));
   gg_file.print(F("\">"));
+
+  gg_file.print(F("<fix>"));
+  if (nofix) {
+    gg_file.print(F("none"));
+  } else {
+    gg_file.print(F("2d"));
+  }
+  gg_file.print(F("</fix>"));
 
   gg_file.print(F("<time>"));
   gg_file.print(
@@ -116,6 +147,7 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   gg_file.print(F("</trkpt>\n"));
   gg_file.print(F(GPX_ENDING));
 
+  // TODO: sync to SD card every N seconds
   // Force data to SD and update the directory entry to avoid data loss.
   if (!gg_file.sync() || gg_file.getWriteError()) {
     error("write file");

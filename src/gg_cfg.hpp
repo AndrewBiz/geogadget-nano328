@@ -10,6 +10,8 @@ const uint8_t SAT_GOOD_SNR = 20;
 const uint16_t NORMAL_RATE = 5000; //ms = 1 tick per 5 sec
 const uint16_t FAST_RATE = 1000;   //ms = 1 tick per 1 sec = 1Hz
 
+const uint16_t NOFIX_LOGGING_INTERVAL = 300; //sec. log to SD every 5 min in nofix conditions
+
 // Log file base name.  Must be six characters or less.
 #define FILE_BASE_NAME "GGTRK"
 

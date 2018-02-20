@@ -27,7 +27,7 @@ static gps_fix fix;
 
 //--------------------------
 void setup() {
-  D(DEBUG_PORT.begin(9600);)
+  // DEBUG_PORT.begin(9600);
 
   display.init();
 
