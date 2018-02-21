@@ -81,15 +81,17 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
 // Log a data record to SD card file
 void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   char _buf[15];
-  NeoGPS::clock_t ts_nofix_detected = 0;
-  NeoGPS::clock_t ts_current = fix.dateTime;
-  bool nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
+  static NeoGPS::clock_t ts_nofix_detected = 0;
+  NeoGPS::clock_t ts_current = 0;
+  bool nofix = false;
 
+  ts_current = fix.dateTime;
+  nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
   // checks if fix is ok to be recorded
   if (nofix) {
-    if(ts_nofix_detected > 0) {
+    if (ts_nofix_detected > 0) {
       // checking if it is high time to record to the log
-      if((ts_current - ts_nofix_detected) < NOFIX_LOGGING_INTERVAL) {
+      if ((ts_current - ts_nofix_detected) < NOFIX_LOGGING_INTERVAL) {
         return;   // exit with no logging to SD card
       } else {
         ts_nofix_detected = ts_current;
@@ -120,6 +122,12 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
     gg_file.print(F("2d"));
   }
   gg_file.print(F("</fix>"));
+
+  // gg_file.print(F("<desc>"));
+  // gg_file.print(ts_nofix_detected);
+  // gg_file.print(F(", "));
+  // gg_file.print(ts_current);
+  // gg_file.print(F("</desc>"));
 
   gg_file.print(F("<time>"));
   gg_file.print(
