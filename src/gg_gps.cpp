@@ -18,13 +18,63 @@ bool GPS::set_rate(uint16_t rate) {
 }
 
 //--------------------------
+const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
+  0x06, 0x3B,             // ID CFG-PM2
+  0x2C, 0x00,             // len = 002C=44b
+  0x01,                   // version
+  0x06,                   // reserved1
+  0x00,                   // r2
+  0x00,                   // r3
+  0x00, 0x98, 0x02, 0x00, // flags: 0000 0000 0000 0010:1001 1000 0000 0000 ()
+  0x88, 0x13, 0x00, 0x00, // 1388 = 5000ms updatePeriod TODO: calculate update period from NORMAL_RATE
+  0x10, 0x27, 0x00, 0x00, // 2710 = 10000ms searchPeriod
+  0x00, 0x00, 0x00, 0x00, // gridOffset
+  0x00, 0x00,             // onTime
+  0x00, 0x00,             // minAcqTime
+  0x2C, 0x01,             // r4
+  0x00, 0x00,             // r5
+  0x4F, 0xC1, 0x03, 0x00, // r6
+  0x86, 0x02, 0x00, 0x00, // r7
+  0xFE,                   // r8
+  0x00,                   // r9
+  0x00, 0x00,             // r10
+  0x64, 0x40, 0x01, 0x00  // r11
+};
+
+const unsigned char ubx_cfg_rxm_power_save[] PROGMEM = {
+  0x06, 0x11,   // ID CFG-RXM
+  0x02, 0x00,   // len = 2b
+  0x08,         // reserved = 08
+  0x01          // lpMode (01 = PowerSave)
+};
+
+void GPS::go_power_save() {
+  write_P_simple(ubx_cfg_pm2_cyclic, sizeof(ubx_cfg_pm2_cyclic));
+  write_P_simple(ubx_cfg_rxm_power_save, sizeof(ubx_cfg_rxm_power_save));
+}
+
+const unsigned char ubx_cfg_rxm_power_max[] PROGMEM = {
+  0x06, 0x11,   // ID CFG-RXM
+  0x02, 0x00,   // len = 2b
+  0x08,         // reserved = 08
+  0x00          // lpMode (00 = Max Power)
+};
+
+void GPS::go_power_max() {
+  write_P_simple(ubx_cfg_rxm_power_max, sizeof(ubx_cfg_rxm_power_max));
+}
+
+//--------------------------
 void GPS::start_running() {
+  go_power_max();
+
   // set 1Hz rate (1000ms)
   if (!set_rate(1000)) {
     D(DEBUG_PORT.println(F("set rate FAILED!"));)
   } else {
     D(DEBUG_PORT.println(F("set rate OK"));)
   }
+
   // disabling NMEA 'spam'
   for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
     ublox::configNMEA( *this, (NMEAGPS::nmea_msg_t) i, 0 );
@@ -127,3 +177,18 @@ bool GPS::running() {
   }
   return (state == RUNNING);
 } // running
+
+
+//--------------------------
+void GPS::write_P_simple(const unsigned char* progmem_msg, size_t len){
+  m_device->print( (char) SYNC_1 );
+  m_device->print( (char) SYNC_2 );
+  uint8_t  crc_a = 0;
+  uint8_t  crc_b = 0;
+  while (len-- > 0) {
+    uint8_t c = pgm_read_byte( progmem_msg++ );
+    write(c, crc_a, crc_b);
+  }
+  m_device->print( (char) crc_a );
+  m_device->print( (char) crc_b );
+};

@@ -235,6 +235,12 @@ protected:
                NMEAGPS::intervalCompleted();
       }
 
+    // AND tweak: put in protected:
+    static const uint8_t SYNC_1 = 0xB5;
+    static const uint8_t SYNC_2 = 0x62;
+    Stream *m_device;
+    // end of ANB tweak
+
 private:
     ublox::msg_t   *storage;   // cached ptr to hold a received msg.
 
@@ -280,10 +286,6 @@ private:
     void rxBegin();
     bool rxEnd();
 
-    static const uint8_t SYNC_1 = 0xB5;
-    static const uint8_t SYNC_2 = 0x62;
-
-    Stream *m_device;
 
     bool parseNavStatus ( uint8_t chr );
     bool parseNavDOP    ( uint8_t chr );

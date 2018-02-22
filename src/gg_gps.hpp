@@ -15,12 +15,17 @@ public:
   } state NEOGPS_BF(8);
 
   GPS(Stream*);
-  
+
   bool set_rate(uint16_t rate);
+  void go_power_save(void);
+  void go_power_max(void);
+
   void start_running(void);
   bool running(void);
 
+
 private:
   void get_signal(void);
+  void write_P_simple(const unsigned char* progmem_msg, size_t len);
 
 } NEOGPS_PACKED;
