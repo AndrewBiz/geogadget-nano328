@@ -24,3 +24,4 @@
 |28206 |1721 | added go_power_max and go_power_save for GPS device
 |28386 |1689 | added logic to not to log the nofix values (one nofix per 5 minutes)
 |28442 |1689 | added desc "location NOK" to GPX
+|28478 |1689 | fixed errors
