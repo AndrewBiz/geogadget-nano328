@@ -8,3 +8,4 @@
 .vscode/launch.json
 .vscode/settings.json
 extras/logs
+.vscode/*.db
