@@ -76,9 +76,6 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   bool nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
   bool noalt = (!fix.valid.altitude);
 
-  // TODO: put this into initialization
-  // ts_current = fix.dateTime;
-  // nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
   // checks if fix is ok to be recorded
   if (nofix) {
     if (ts_nofix_detected > 0) {
@@ -153,7 +150,6 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   gg_file.print(F("</trkpt>\n"));
   gg_file.print(F(GPX_ENDING));
 
-  // TODO: sync to SD card every N seconds
   // Force data to SD and update the directory entry to avoid data loss.
   if (!gg_file.sync() || gg_file.getWriteError()) {
     error("write file");
