@@ -1,4 +1,5 @@
 #include "gg_cfg.hpp"
+#include "gg_version.hpp"
 #include "gg_debug.hpp"
 #include "gg_sd.hpp"
 #include "gg_gps.hpp"
@@ -55,7 +56,7 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
   }
   gg_file.print(F(
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<gpx version=\"1.0\">\n"
+    "<gpx version=\"1.1\" creator=\"Geo-Gadget v" GG_VERSION " (" GG_ORIGIN ")\">\n"
     "\t<trk><trkseg>\n"));
   gg_file.print(F(GPX_ENDING));
 }

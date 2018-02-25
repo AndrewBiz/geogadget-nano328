@@ -29,3 +29,5 @@
 |28534 |1687 | print 2d if no valid altitude
 |28516 |1687 | replace sd.seekSet with seekEnd
 |28330 |1723?| 1 sd_file.timestamp call instead of 3
+|28408 |1723 | added creator to GPX header
+|28412 |1687?| change version to 00.00.00 format

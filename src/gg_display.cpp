@@ -74,8 +74,8 @@ void GG_Display::show_init_screen(const NMEAGPS & gps, const gps_fix & fix) {
 
   _display.setCursor(3, 0);
   _display.print(F("Geo-Gadget"));
-  _display.setCursor(4, 1);
-  _display.print(F("v" GG_VERSION));
+  _display.setCursor(3, 1);
+  _display.print(F("v " GG_VERSION));
 
   _display.setCursor(0, 2);
   _display.print(F("getting signal"));
