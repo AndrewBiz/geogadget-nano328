@@ -4,7 +4,8 @@
 - [x] refactor to use FormatDate and FormatTime functions
 - [x] use alt NeoSerial lib
 - [x] add SATs info (starting screen, operation screen)
-- [x] green gg: 1fix per xx (5-10 sec) in normal mode
+- [x] green gg: 1 GPS fix per xx (5-10 sec) in normal mode
+- [ ] green gg: log 1 fix per xx (5-10 sec) in all modes (in sd_log)
 - [x] green gg: power save mode of GPS device: cyclyc tracking
 - [x] log NoFix records every 5 minutes (to avoid recording 2Hz useless fixes in weak signal (cyclyc mode))
 - [ ] green gg: to wake up GPS send dummy 0xff message to GPS and wait for ACK
