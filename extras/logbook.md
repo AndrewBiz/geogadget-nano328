@@ -27,3 +27,5 @@
 |28478 |1689 | fixed errors
 |28476 |1687 | gg_file_name [] instead of [13]
 |28534 |1687 | print 2d if no valid altitude
+|28516 |1687 | replace sd.seekSet with seekEnd
+|28330 |1723?| 1 sd_file.timestamp call instead of 3

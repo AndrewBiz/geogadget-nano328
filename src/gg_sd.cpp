@@ -50,15 +50,15 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
     error("file open");
   }
   // set file datetimes
-  if (!gg_file.timestamp(T_CREATE, year, month, date, hours, minutes, seconds)) {
-    error("set CREATE time");
+  if (!gg_file.timestamp((T_CREATE | T_WRITE | T_ACCESS), year, month, date, hours, minutes, seconds)) {
+    error("set timestamp");
   }
-  if (!gg_file.timestamp(T_WRITE, year, month, date, hours, minutes, seconds)) {
-    error("set WRITE time");
-  }
-  if (!gg_file.timestamp(T_ACCESS, year, month, date, hours, minutes, seconds)) {
-    error("set ACCESS time");
-  }
+  // if (!gg_file.timestamp(T_WRITE, year, month, date, hours, minutes, seconds)) {
+  //   error("set WRITE time");
+  // }
+  // if (!gg_file.timestamp(T_ACCESS, year, month, date, hours, minutes, seconds)) {
+  //   error("set ACCESS time");
+  // }
   gg_file.print(F(
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<gpx version=\"1.0\">\n"
@@ -94,8 +94,7 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
     ts_nofix_detected = 0;
   }
 
-  //TODO replace with seekEND
-  gg_file.seekSet(gg_file.fileSize() + GPX_ENDING_OFFSET);
+  gg_file.seekEnd(GPX_ENDING_OFFSET);
   gg_file.print(F("\t\t<trkpt "));
 
   gg_file.print(F("lat=\""));
