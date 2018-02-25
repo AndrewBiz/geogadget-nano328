@@ -1,4 +1,5 @@
 // #include <Arduino.h>
+#include "gg_cfg.hpp"
 #include "gg_debug.hpp"
 #include "gg_gps.hpp"
 #include <NeoGPS_cfg.h>
@@ -18,6 +19,9 @@ bool GPS::set_rate(uint16_t rate) {
 }
 
 //--------------------------
+const uint8_t NORMAL_RATE_l = (uint8_t) NORMAL_RATE;
+const uint8_t NORMAL_RATE_h = (uint8_t) (NORMAL_RATE >> 8);
+
 const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
   0x06, 0x3B,             // ID CFG-PM2
   0x2C, 0x00,             // len = 002C=44b
@@ -26,7 +30,7 @@ const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
   0x00,                   // r2
   0x00,                   // r3
   0x00, 0x98, 0x02, 0x00, // flags: 0000 0000 0000 0010:1001 1000 0000 0000 ()
-  0x88, 0x13, 0x00, 0x00, // 1388 = 5000ms updatePeriod TODO: calculate update period from NORMAL_RATE
+  NORMAL_RATE_l, NORMAL_RATE_h, 0x00, 0x00, // 1388 = 5000ms updatePeriod
   0x10, 0x27, 0x00, 0x00, // 2710 = 10000ms searchPeriod
   0x00, 0x00, 0x00, 0x00, // gridOffset
   0x00, 0x00,             // onTime
