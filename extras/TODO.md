@@ -11,10 +11,12 @@
 - [ ] green gg: minimal LED flashing via UBX-CFG start_running (TIMEPULSE)
 - [ ] green gg: implement sleep_mode (like in OpenLog project), wake up via UART OR Button press
 - [ ] do sd.sync every 10 secs (its too expensive operation)
-- [ ] upgrade to GPX 1.1
-- [ ] add header info to GPX (Geo-Gadged, version, url)
+- [ ] upgrade to GPX 1.1, add header info to GPX (Geo-Gadged, version, url)
 - [ ] do SD card init message (like in NMEASDLOG.ino)
+- [ ] baudrate to increase btw GPS and MCU (115200?)
 - [ ] make parsing UBX-NAV-PVT instead all other tags
+- [ ] check ERR is wrong
+- [ ] check ALT is wrong
 - [ ] to understand how it works: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
 - [ ] make program reset the device after 25 minutes of work - to avoid hangings
