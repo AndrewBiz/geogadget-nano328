@@ -877,7 +877,6 @@ bool ubloxGPS::parseNavTimeUTC( uint8_t chr )
         #endif
 
         case 19: {
-            // TODO: ANB - Раскурить...
             ublox::nav_timeutc_t::valid_t &v =
               *((ublox::nav_timeutc_t::valid_t *) &chr);
 
