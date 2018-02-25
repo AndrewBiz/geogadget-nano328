@@ -4,7 +4,6 @@
 class NMEAGPS;
 class gps_fix;
 
-const uint8_t BASE_NAME_SIZE = sizeof(FILE_BASE_NAME) - 1;
 extern char gg_file_name[];
 
 //--------------------------

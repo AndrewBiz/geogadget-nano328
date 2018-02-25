@@ -8,6 +8,9 @@
 // Error messages stored in flash.
 #define error(msg) sd.errorHalt(F(msg))
 
+const uint8_t FILE_NAME_DIGIT_H = sizeof(FILE_BASE_NAME) - 1;
+const uint8_t FILE_NAME_DIGIT_L = FILE_NAME_DIGIT_H + 1;
+
 // Seek to fileSize + this position before writing track points.
 #define GPX_ENDING_OFFSET -24
 #define GPX_ENDING "\t</trkseg></trk>\n</gpx>\n"
@@ -16,7 +19,7 @@ const uint8_t chipSelect = SS;
 
 SdFat sd;
 SdFile gg_file;
-char gg_file_name[13] = FILE_BASE_NAME "00.GPX";
+char gg_file_name[] = FILE_BASE_NAME "00.GPX";
 char gg_dir_name[9] = "";
 
 //--------------------------
@@ -34,27 +37,13 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
   if (!sd.chdir(gg_dir_name, true)) {
     error("chdir 2");
   }
-  // TODO: Alternative way of file name generation
-  // Pick a numbered filename, 00 to 99.
-  // char filename[15] = "data_##.txt";
-  //
-  // for (uint8_t i=0; i<100; i++) {
-  //   filename[5] = '0' + i/10;
-  //   filename[6] = '0' + i%10;
-  //   if (!SD.exists(filename)) {
-  //     // Use this one!
-  //     break;
-  //   }
-  // }
 
-  while (sd.exists(gg_file_name)) {
-    if (gg_file_name[BASE_NAME_SIZE + 1] != '9') {
-      gg_file_name[BASE_NAME_SIZE + 1]++;
-    } else if (gg_file_name[BASE_NAME_SIZE] != '9') {
-      gg_file_name[BASE_NAME_SIZE + 1] = '0';
-      gg_file_name[BASE_NAME_SIZE]++;
-    } else {
-      error("create fname");
+  for (uint8_t i = 0; i < 100; i++) {
+    gg_file_name[FILE_NAME_DIGIT_H] = '0' + i/10;
+    gg_file_name[FILE_NAME_DIGIT_L] = '0' + i%10;
+    if (!sd.exists(gg_file_name)) {
+      // Use this one!
+      break;
     }
   }
   if (!gg_file.open(gg_file_name, O_CREAT | O_WRITE | O_EXCL)) {
@@ -82,11 +71,14 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
 void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   char _buf[15];
   static NeoGPS::clock_t ts_nofix_detected = 0;
-  NeoGPS::clock_t ts_current = 0;
-  bool nofix = false;
 
-  ts_current = fix.dateTime;
-  nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
+  NeoGPS::clock_t ts_current = fix.dateTime;
+  bool nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
+  bool noalt = (!fix.valid.altitude);
+
+  // TODO: put this into initialization
+  // ts_current = fix.dateTime;
+  // nofix = (!fix.valid.location) || (fix.status == gps_fix::STATUS_NONE);
   // checks if fix is ok to be recorded
   if (nofix) {
     if (ts_nofix_detected > 0) {
@@ -119,7 +111,11 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   if (nofix) {
     gg_file.print(F("none"));
   } else {
-    gg_file.print(F("2d"));
+    if (noalt) {
+      gg_file.print(F("2d"));
+    } else {
+      gg_file.print(F("3d"));
+    }
   }
   gg_file.print(F("</fix>"));
 
@@ -148,10 +144,12 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   gg_file.print(F("Z"));
   gg_file.print(F("</time>"));
 
-  // TODO: avoid printing bad elevation data
-  gg_file.print(F("<ele>")); // meters
-  gg_file.print((int) fix.altitude());
-  gg_file.print(F("</ele>"));
+  if (not noalt) {
+    gg_file.print(F("<ele>")); // meters
+    gg_file.print((int) fix.altitude());
+    gg_file.print(F("</ele>"));
+  }
+
   gg_file.print(F("</trkpt>\n"));
   gg_file.print(F(GPX_ENDING));
 

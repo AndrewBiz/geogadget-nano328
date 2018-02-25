@@ -25,3 +25,5 @@
 |28386 |1689 | added logic to not to log the nofix values (one nofix per 5 minutes)
 |28442 |1689 | added desc "location NOK" to GPX
 |28478 |1689 | fixed errors
+|28476 |1687 | gg_file_name [] instead of [13]
+|28534 |1687 | print 2d if no valid altitude
