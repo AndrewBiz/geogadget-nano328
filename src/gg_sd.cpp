@@ -53,12 +53,6 @@ void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint
   if (!gg_file.timestamp((T_CREATE | T_WRITE | T_ACCESS), year, month, date, hours, minutes, seconds)) {
     error("set timestamp");
   }
-  // if (!gg_file.timestamp(T_WRITE, year, month, date, hours, minutes, seconds)) {
-  //   error("set WRITE time");
-  // }
-  // if (!gg_file.timestamp(T_ACCESS, year, month, date, hours, minutes, seconds)) {
-  //   error("set ACCESS time");
-  // }
   gg_file.print(F(
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<gpx version=\"1.0\">\n"
