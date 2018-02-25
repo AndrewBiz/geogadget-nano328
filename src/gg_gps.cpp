@@ -1,4 +1,3 @@
-// #include <Arduino.h>
 #include "gg_cfg.hpp"
 #include "gg_debug.hpp"
 #include "gg_gps.hpp"
@@ -9,18 +8,9 @@
 const unsigned int ACQ_DOT_INTERVAL = 500UL;
 
 //--------------------------
-GPS::GPS(Stream* device) : ubloxGPS(device) {
-  state = GETTING_SIGNAL;
-}
+// UBLOX device constants section
 
-//--------------------------
-bool GPS::set_rate(uint16_t rate) {
-  return send(ublox::cfg_rate_t(rate, 1, ublox::UBX_TIME_REF_UTC));
-}
-
-//--------------------------
-const uint8_t NORMAL_RATE_l = (uint8_t) NORMAL_RATE;
-const uint8_t NORMAL_RATE_h = (uint8_t) (NORMAL_RATE >> 8);
+const uint32_t GPS_SEARCH_PERIOD = 20000; // ms, 20 sec
 
 const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
   0x06, 0x3B,             // ID CFG-PM2
@@ -30,8 +20,16 @@ const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
   0x00,                   // r2
   0x00,                   // r3
   0x00, 0x98, 0x02, 0x00, // flags: 0000 0000 0000 0010:1001 1000 0000 0000 ()
-  NORMAL_RATE_l, NORMAL_RATE_h, 0x00, 0x00, // 1388 = 5000ms updatePeriod
-  0x10, 0x27, 0x00, 0x00, // 2710 = 10000ms searchPeriod
+  // update Period (e.g. 5000ms = 0x1388 => 0x88, 0x13, 0x00, 0x00)
+  (uint8_t) NORMAL_RATE,  // low byte
+    (uint8_t) (NORMAL_RATE >> 8),
+      0x00,
+        0x00,
+  // searchPeriod (e.g. 10000ms = 0x2710 => 0x10, 0x27, 0x00, 0x00)
+  (uint8_t) GPS_SEARCH_PERIOD,  // low byte
+    (uint8_t) (GPS_SEARCH_PERIOD >> 8),
+      (uint8_t) (GPS_SEARCH_PERIOD >> 16),
+        (uint8_t) (GPS_SEARCH_PERIOD >> 24),
   0x00, 0x00, 0x00, 0x00, // gridOffset
   0x00, 0x00,             // onTime
   0x00, 0x00,             // minAcqTime
@@ -52,11 +50,6 @@ const unsigned char ubx_cfg_rxm_power_save[] PROGMEM = {
   0x01          // lpMode (01 = PowerSave)
 };
 
-void GPS::go_power_save() {
-  write_P_simple(ubx_cfg_pm2_cyclic, sizeof(ubx_cfg_pm2_cyclic));
-  write_P_simple(ubx_cfg_rxm_power_save, sizeof(ubx_cfg_rxm_power_save));
-}
-
 const unsigned char ubx_cfg_rxm_power_max[] PROGMEM = {
   0x06, 0x11,   // ID CFG-RXM
   0x02, 0x00,   // len = 2b
@@ -64,8 +57,99 @@ const unsigned char ubx_cfg_rxm_power_max[] PROGMEM = {
   0x00          // lpMode (00 = Max Power)
 };
 
+// CFG-TP5
+const uint32_t GPS_PULSE_NOFIX_PERIOD = 5000000; // us, 5 sec
+const uint32_t GPS_PULSE_FIX_PERIOD_NORMAL = (uint32_t)NORMAL_RATE * 1000; // us, 5 sec
+const uint32_t GPS_PULSE_FIX_PERIOD_FAST = (uint32_t)FAST_RATE * 1000; // us, 1 sec
+const uint32_t GPS_PULSE_NOFIX_LEN = 100000; // us, 0.1 sec
+const uint32_t GPS_PULSE_FIX_LEN = 1000;     // us, 0.001 sec
+
+const unsigned char ubx_cfg_tp5_power_save[] PROGMEM = {
+  0x06, 0x31,   // ID CFG-TP5
+  0x20, 0x00,   // len = 32b
+  0x00,         // tpIdx 0 = TIMEPULSE
+  0x01,         // r1
+  0x00, 0x00,   // r2
+  0x32, 0x00,   // antCableDelay 0x0032 = 50ns
+  0x00, 0x00,   // rfGroupDelay
+  // freqPeriod = 0x007A1200 = 8000000 us
+  (uint8_t) GPS_PULSE_NOFIX_PERIOD,  // low byte
+    (uint8_t) (GPS_PULSE_NOFIX_PERIOD >> 8),
+      (uint8_t) (GPS_PULSE_NOFIX_PERIOD >> 16),
+        (uint8_t) (GPS_PULSE_NOFIX_PERIOD >> 24),
+  // freqPeriodLock = 0x004C4B40 = 5000000 us
+  (uint8_t) GPS_PULSE_FIX_PERIOD_NORMAL,  // low byte
+    (uint8_t) (GPS_PULSE_FIX_PERIOD_NORMAL >> 8),
+      (uint8_t) (GPS_PULSE_FIX_PERIOD_NORMAL >> 16),
+        (uint8_t) (GPS_PULSE_FIX_PERIOD_NORMAL >> 24),
+  // pulseLenRatio = 0x000186A0 = 100000 us
+  (uint8_t) GPS_PULSE_NOFIX_LEN,  // low byte
+    (uint8_t) (GPS_PULSE_NOFIX_LEN >> 8),
+      (uint8_t) (GPS_PULSE_NOFIX_LEN >> 16),
+        (uint8_t) (GPS_PULSE_NOFIX_LEN >> 24),
+  // pulseLenRatioLock = 0x03E8 = 1000 us
+  (uint8_t) GPS_PULSE_FIX_LEN,  // low byte
+    (uint8_t) (GPS_PULSE_FIX_LEN >> 8),
+      (uint8_t) (GPS_PULSE_FIX_LEN >> 16),
+        (uint8_t) (GPS_PULSE_FIX_LEN >> 24),
+  0x00, 0x00, 0x00, 0x00, // userConfigDelay
+  0x37, 0x00, 0x00, 0x00  // flags = 0x37 = 0011 0111
+};
+
+const unsigned char ubx_cfg_tp5_power_max[] PROGMEM = {
+  0x06, 0x31,   // ID CFG-TP5
+  0x20, 0x00,   // len = 32b
+  0x00,         // tpIdx 0 = TIMEPULSE
+  0x01,         // r1
+  0x00, 0x00,   // r2
+  0x32, 0x00,   // antCableDelay 0x0032 = 50ns
+  0x00, 0x00,   // rfGroupDelay
+  // freqPeriod = 0x007A1200 = 8000000 us
+  (uint8_t) GPS_PULSE_NOFIX_PERIOD,  // low byte
+    (uint8_t) (GPS_PULSE_NOFIX_PERIOD >> 8),
+      (uint8_t) (GPS_PULSE_NOFIX_PERIOD >> 16),
+        (uint8_t) (GPS_PULSE_NOFIX_PERIOD >> 24),
+  // freqPeriodLock = 0x004C4B40 = 5000000 us
+  (uint8_t) GPS_PULSE_FIX_PERIOD_FAST,  // low byte
+    (uint8_t) (GPS_PULSE_FIX_PERIOD_FAST >> 8),
+      (uint8_t) (GPS_PULSE_FIX_PERIOD_FAST >> 16),
+        (uint8_t) (GPS_PULSE_FIX_PERIOD_FAST >> 24),
+  // pulseLenRatio = 0x000186A0 = 100000 us
+  (uint8_t) GPS_PULSE_NOFIX_LEN,  // low byte
+    (uint8_t) (GPS_PULSE_NOFIX_LEN >> 8),
+      (uint8_t) (GPS_PULSE_NOFIX_LEN >> 16),
+        (uint8_t) (GPS_PULSE_NOFIX_LEN >> 24),
+  // pulseLenRatioLock = 0x03E8 = 1000 us
+  (uint8_t) GPS_PULSE_FIX_LEN,  // low byte
+    (uint8_t) (GPS_PULSE_FIX_LEN >> 8),
+      (uint8_t) (GPS_PULSE_FIX_LEN >> 16),
+        (uint8_t) (GPS_PULSE_FIX_LEN >> 24),
+  0x00, 0x00, 0x00, 0x00, // userConfigDelay
+  0x37, 0x00, 0x00, 0x00  // flags = 0x37 = 0011 0111
+};
+// END OF: UBLOX device constants section
+
+//--------------------------
+GPS::GPS(Stream* device) : ubloxGPS(device) {
+  state = GETTING_SIGNAL;
+}
+
+//--------------------------
+bool GPS::set_rate(uint16_t rate) {
+  return send(ublox::cfg_rate_t(rate, 1, ublox::UBX_TIME_REF_UTC));
+}
+
+//--------------------------
+void GPS::go_power_save() {
+  write_P_simple(ubx_cfg_tp5_power_save, sizeof(ubx_cfg_tp5_power_save));
+  write_P_simple(ubx_cfg_pm2_cyclic, sizeof(ubx_cfg_pm2_cyclic));
+  write_P_simple(ubx_cfg_rxm_power_save, sizeof(ubx_cfg_rxm_power_save));
+}
+
+//--------------------------
 void GPS::go_power_max() {
   write_P_simple(ubx_cfg_rxm_power_max, sizeof(ubx_cfg_rxm_power_max));
+  write_P_simple(ubx_cfg_tp5_power_max, sizeof(ubx_cfg_tp5_power_max));
 }
 
 //--------------------------

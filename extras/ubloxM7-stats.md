@@ -38,7 +38,7 @@
 
 # FYI UBX messages
 
-06 3B UBX-CFG-PM2 (len 44b)
+## 06 3B UBX-CFG-PM2 (len 44b)
 
 Update period 1000ms, cyclic tracking, update RTC, update EPH:
 B5 62         header
@@ -104,3 +104,22 @@ B5 62
 08
 00      00 = Continious Mode (Max Power)
 21 91
+
+
+## 06 31 UBX-CFG-TP5 (len 32b)
+
+B5 62
+06 31       UBX-CFG-TP5
+20 00       32b
+00          tpIdx 0 = TIMEPULSE
+01          r1
+00 00       r2
+32 00       antCableDelay 0x0032 = 50ns
+00 00       rfGroupDelay
+00 12 7A 00 freqPeriod = 0x007A1200 = 8000000 us
+40 4B 4C 00 freqPeriodLock = 0x004C4B40 = 5000000 us
+A0 86 01 00 pulseLenRatio = 0x000186A0 = 100000 us
+E8 03 00 00 pulseLenRatioLock = 0x03E8 = 1000 us
+00 00 00 00 userConfigDelay
+37 00 00 00 flags = 0x37 = 0011 0111
+36 2A       checksum

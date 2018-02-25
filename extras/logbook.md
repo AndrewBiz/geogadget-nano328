@@ -31,3 +31,4 @@
 |28330 |1723?| 1 sd_file.timestamp call instead of 3
 |28408 |1723 | added creator to GPX header
 |28412 |1687?| change version to 00.00.00 format
+|28496 |1691 | added UBX-CFG-TP5 parameters
