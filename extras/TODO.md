@@ -20,3 +20,4 @@
 - [ ] to understand how it works: ```
 ublox::nav_timeutc_t::valid_t &v = *((ublox::nav_timeutc_t::valid_t *) &chr);```
 - [ ] make program reset the device after 25 minutes of work - to avoid hangings
+- [ ] long-click - prepare for shutdown (sd.sync, switch all off)
