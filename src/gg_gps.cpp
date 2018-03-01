@@ -32,7 +32,9 @@ const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
         (uint8_t) (GPS_SEARCH_PERIOD >> 24),
   0x00, 0x00, 0x00, 0x00, // gridOffset
   0x00, 0x00,             // onTime
-  0x00, 0x00,             // minAcqTime
+  // minAcqTime
+  (uint8_t) GPS_MIN_ACQ_TIME,  // low byte
+    (uint8_t) (GPS_MIN_ACQ_TIME >> 8),
   0x2C, 0x01,             // r4
   0x00, 0x00,             // r5
   0x4F, 0xC1, 0x03, 0x00, // r6
@@ -58,10 +60,10 @@ const unsigned char ubx_cfg_rxm_power_max[] PROGMEM = {
 };
 
 // CFG-TP5
-const uint32_t GPS_PULSE_NOFIX_PERIOD = 5000000; // us, 5 sec
+const uint32_t GPS_PULSE_NOFIX_PERIOD = 7000000; // us, 7 sec
 const uint32_t GPS_PULSE_FIX_PERIOD_NORMAL = (uint32_t)NORMAL_RATE * 1000; // us, 5 sec
 const uint32_t GPS_PULSE_FIX_PERIOD_FAST = (uint32_t)FAST_RATE * 1000; // us, 1 sec
-const uint32_t GPS_PULSE_NOFIX_LEN = 100000; // us, 0.1 sec
+const uint32_t GPS_PULSE_NOFIX_LEN = 1000; // us, 0.001 sec
 const uint32_t GPS_PULSE_FIX_LEN = 1000;     // us, 0.001 sec
 
 const unsigned char ubx_cfg_tp5_power_save[] PROGMEM = {
