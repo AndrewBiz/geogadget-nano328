@@ -11,6 +11,7 @@ const unsigned int ACQ_DOT_INTERVAL = 500UL;
 // UBLOX device constants section
 
 const uint32_t GPS_SEARCH_PERIOD = 20000; // ms, 20 sec
+const uint16_t GPS_MIN_ACQ_TIME = 0; // s
 
 const unsigned char ubx_cfg_pm2_cyclic[] PROGMEM = {
   0x06, 0x3B,             // ID CFG-PM2
