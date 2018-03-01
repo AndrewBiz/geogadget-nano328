@@ -11,6 +11,7 @@
 - [ ] green gg: minimal LED flashing via UBX-CFG start_running (TIMEPULSE)
 - [ ] green gg: log 1 fix per xx (5-10 sec) in all modes (in sd_log)
 - [ ] baudrate to increase btw GPS and MCU (115200?)
+- [ ] completely disable NMEA via CFG-PRT
 - [ ] green gg: implement sleep_mode (like in OpenLog project), wake up via UART OR Button press
 - [ ] green gg: to wake up GPS send dummy 0xff message to GPS and wait for ACK
 - [ ] do SD card init message (like in NMEASDLOG.ino)
