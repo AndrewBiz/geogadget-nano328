@@ -40,6 +40,13 @@ void setup() {
   gpsPort.begin(9600);
   D(DEBUG_PORT.println(F("Looking for GPS device on " GPS_PORT_NAME));)
 
+  // changing GPS_PORT baudrate
+  gps.set_fast_baudrate();
+  gpsPort.flush();
+  gpsPort.end();
+  delay(500);
+  gpsPort.begin(GPS_UART_BAUDRATE_FAST);
+
   gps.start_running();
   bool running = false;
   do {
