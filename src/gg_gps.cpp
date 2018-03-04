@@ -275,7 +275,7 @@ void GPS::get_signal() {
       D(DEBUG_PORT.print(F("Getting signal..."));)
     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
       dotPrint = millis();
-      DEBUG_PORT.print(F("."));
+      // DEBUG_PORT.print(F("."));
     }
   }
 } // get_signal

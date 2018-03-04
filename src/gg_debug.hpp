@@ -12,5 +12,6 @@
 #endif
 
 void _dumpPort(Stream& port_in, Stream& port_out, unsigned int cycles);
+void _tick(Stream& port_out);
 
 #endif

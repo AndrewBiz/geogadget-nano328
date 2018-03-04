@@ -13,11 +13,13 @@
 #include "gg_sd.hpp"
 #include "gg_format.hpp"
 #include "gg_display.hpp"
+#include "gg_green.hpp"
 
 GG_Display display;
 
 const uint8_t modeButtonPin = 2;
 PinButton modeButton(modeButtonPin);
+extern bool int_btn_event;
 
 enum class Mode : uint8_t {LOGGING_DISPLAY, TO_LOGGING_NORMAL, LOGGING_NORMAL, TO_LOGGING_DISPLAY} mode;
 
@@ -27,7 +29,7 @@ static gps_fix fix;
 
 //--------------------------
 void setup() {
-  // DEBUG_PORT.begin(9600);
+  DEBUG_PORT.begin(9600);
 
   display.init();
 
@@ -69,6 +71,9 @@ void setup() {
 void loop() {
   modeButton.update();
 
+  uint32_t now = millis();
+  _tick(DEBUG_PORT);
+
   switch (mode) {
     case Mode::LOGGING_DISPLAY:
       if (gps.available(gpsPort)) {
@@ -93,7 +98,15 @@ void loop() {
         fix = gps.read();
         log_fix(gps, fix);
       }
-      if (modeButton.isSingleClick()) {
+      // go to sleep
+  DEBUG_PORT.print(now);
+  DEBUG_PORT.println(F("go to sleep"));
+      CPU_sleepNow();
+  DEBUG_PORT.print(now);
+  DEBUG_PORT.println(F("good morning!"));
+  DEBUG_PORT.println(int_btn_event);
+      // wake up here!
+      if (modeButton.isSingleClick() || int_btn_event) {
         mode = Mode::TO_LOGGING_DISPLAY;
       }
       break;

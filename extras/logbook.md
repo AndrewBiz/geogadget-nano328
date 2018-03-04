@@ -33,3 +33,5 @@
 |28412 |1687?| change version to 00.00.00 format
 |28496 |1691 | added UBX-CFG-TP5 parameters
 |28586 |1691 | baudrate 19200
+|28852 |1660 | sleep CPU in normal mode
+|28964 |1661 | added INT0 and INT1 ISR
