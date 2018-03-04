@@ -123,3 +123,34 @@ E8 03 00 00 pulseLenRatioLock = 0x03E8 = 1000 us
 00 00 00 00 userConfigDelay
 37 00 00 00 flags = 0x37 = 0011 0111
 36 2A       checksum
+
+## 06 00 CFG-PRT (len 20b)
+B5 62
+06 00
+14 00       20b
+01          portID
+00          r0
+00 00       txReady
+D0 08 00 00 mode => 0000 1000 (no parity) 1101(8bit reserved)0000
+80 25 00 00 baudrate = 0x25 0x80 = 9600
+                       0x01 0xC2 0x00 = 115200
+01 00       inProtoMask   0x01 = UBX only
+01 00       outProtoMask  0x01 = UBX only
+00 00       flags
+00 00       r5
+9A 79       checksum
+
+
+B5 62
+06 00
+14 00
+01
+00
+00 00
+C0 08 00 00 ! => 0000 1000 1100 0000
+80 25 00 00
+01 00
+01 00
+00 00
+00 00
+8A 79

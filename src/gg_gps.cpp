@@ -10,6 +10,25 @@ const unsigned int ACQ_DOT_INTERVAL = 500UL;
 //--------------------------
 // UBLOX device constants section
 
+const unsigned char ubx_cfg_prt_fast[] PROGMEM = {
+  0x06, 0x00,             // ID
+  0x14, 0x00,             // 20b
+  0x01,                   // portID
+  0x00,                   // r0
+  0x00, 0x00,             // txReady
+  0xD0, 0x08, 0x00, 0x00, // mode => 0000 1000 (no parity) 1101(8bit reserved)0000
+  // baudRate  80 25 00 00 baudrate = 0x25 0x80 = 9600low byte
+  (uint8_t) GPS_UART_BAUDRATE_FAST,
+    (uint8_t) (GPS_UART_BAUDRATE_FAST >> 8),
+      (uint8_t) (GPS_UART_BAUDRATE_FAST >> 16),
+        (uint8_t) (GPS_UART_BAUDRATE_FAST >> 24),
+  0x01, 0x00,             // inProtoMask   0x01 = UBX only
+  0x01, 0x00,             // outProtoMask  0x01 = UBX only
+  0x00, 0x00,             // flags
+  0x00, 0x00              // r5
+};
+
+
 const uint32_t GPS_SEARCH_PERIOD = 20000; // ms, 20 sec
 const uint16_t GPS_MIN_ACQ_TIME = 0; // s
 
@@ -138,6 +157,11 @@ GPS::GPS(Stream* device) : ubloxGPS(device) {
 }
 
 //--------------------------
+void GPS::set_fast_baudrate() {
+  write_P_simple(ubx_cfg_prt_fast, sizeof(ubx_cfg_prt_fast));
+}
+
+//--------------------------
 bool GPS::set_rate(uint16_t rate) {
   return send(ublox::cfg_rate_t(rate, 1, ublox::UBX_TIME_REF_UTC));
 }
@@ -166,10 +190,6 @@ void GPS::start_running() {
     D(DEBUG_PORT.println(F("set rate OK"));)
   }
 
-  // disabling NMEA 'spam'
-  for (uint8_t i=NMEAGPS::NMEA_FIRST_MSG; i<=NMEAGPS::NMEA_LAST_MSG; i++) {
-    ublox::configNMEA( *this, (NMEAGPS::nmea_msg_t) i, 0 );
-  }
   // initially disabling all messages
   disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_STATUS);
   disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS);

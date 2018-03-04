@@ -16,6 +16,7 @@ public:
 
   GPS(Stream*);
 
+  void set_fast_baudrate(void);
   bool set_rate(uint16_t rate);
   void go_power_save(void);
   void go_power_max(void);
