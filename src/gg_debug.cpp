@@ -19,7 +19,7 @@ void _dumpPort(Stream& port_in, Stream& port_out, unsigned int cycles) {
 }
 
 // -----------------------------------------------------------------------------
-const uint8_t TICK_INTERVAL = 100; // ms
+const uint16_t TICK_INTERVAL = 500; // ms
 
 void _tick(Stream& port_out) {
   static uint32_t ts = millis();

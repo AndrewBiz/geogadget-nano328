@@ -302,4 +302,5 @@ void GPS::write_P_simple(const unsigned char* progmem_msg, size_t len){
   }
   m_device->print( (char) crc_a );
   m_device->print( (char) crc_b );
+  m_device->flush();
 };

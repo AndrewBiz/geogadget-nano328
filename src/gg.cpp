@@ -15,9 +15,13 @@
 #include "gg_display.hpp"
 #include "gg_green.hpp"
 
+const uint16_t CPU_SLEEP_INTERVAL = 200; // ms
+
 GG_Display display;
 
-const uint8_t modeButtonPin = 2;
+const uint8_t PIN_GPS_PPS = PD3;    // Ublox pps connected to PD3 (INT1)
+
+const uint8_t modeButtonPin = PD2;  // button connected to PD2 (INT0)
 PinButton modeButton(modeButtonPin);
 extern bool int_btn_event;
 
@@ -39,6 +43,8 @@ void setup() {
   D(DEBUG_PORT.flush();)
 
   // GPS device initializing
+  pinMode(PIN_GPS_PPS, INPUT_PULLUP);
+
   gpsPort.begin(9600);
   D(DEBUG_PORT.println(F("Looking for GPS device on " GPS_PORT_NAME));)
 
@@ -69,10 +75,11 @@ void setup() {
 
 //--------------------------
 void loop() {
+  static uint32_t ts_prev = millis();
   modeButton.update();
 
   uint32_t now = millis();
-  _tick(DEBUG_PORT);
+  // _tick(DEBUG_PORT);
 
   switch (mode) {
     case Mode::LOGGING_DISPLAY:
@@ -99,12 +106,13 @@ void loop() {
         log_fix(gps, fix);
       }
       // go to sleep
-  DEBUG_PORT.print(now);
+      if ((now - ts_prev) >= CPU_SLEEP_INTERVAL) {
   DEBUG_PORT.println(F("go to sleep"));
-      CPU_sleepNow();
-  DEBUG_PORT.print(now);
+  DEBUG_PORT.flush();
+        CPU_sleepNow();
   DEBUG_PORT.println(F("good morning!"));
-  DEBUG_PORT.println(int_btn_event);
+        ts_prev = millis();
+      };
       // wake up here!
       if (modeButton.isSingleClick() || int_btn_event) {
         mode = Mode::TO_LOGGING_DISPLAY;
@@ -114,8 +122,9 @@ void loop() {
     case Mode::TO_LOGGING_DISPLAY:
       gps.set_rate(FAST_RATE);  // 1Hz normally
       gps.go_power_max();
-      display.wakeup();
-      display.clear();
+  display.init();
+      // display.wakeup();
+      // display.clear();
       mode = Mode::LOGGING_DISPLAY;
       break;
 
