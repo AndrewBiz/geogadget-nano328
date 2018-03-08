@@ -68,6 +68,10 @@ void setup() {
 
 //--------------------------
 void loop() {
+  static uint32_t ts_now = 0;
+  static uint32_t ts_logging_display_started = 0;
+
+  ts_now = millis();
   modeButton.update();
 
   switch (mode) {
@@ -77,7 +81,7 @@ void loop() {
         display.show_main_screen(gps, fix, gg_file_name);
         log_fix(gps, fix);
       }
-      if (modeButton.isSingleClick()) {
+      if (modeButton.isSingleClick() or ((ts_now - ts_logging_display_started) >= LOGGING_DISPLAY_INTERVAL)) {
         mode = Mode::TO_LOGGING_NORMAL;
       }
       break;
@@ -107,6 +111,7 @@ void loop() {
       gps.go_power_max();
       display.init();
       int_btn_event = false;
+      ts_logging_display_started = millis();
       mode = Mode::LOGGING_DISPLAY;
       break;
 

@@ -52,3 +52,4 @@ wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
 |28964 |1661 | added INT0 and INT1 ISR
 |29012 |1699 | -DDEBUG + new DebugTools class
 |28972 |1729 | DEBUG off, sleep STANDBY in normal mode
+|29074 |1737 | auto display-off after 20 sec

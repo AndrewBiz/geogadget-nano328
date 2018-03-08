@@ -6,6 +6,8 @@
 // SNR limit to consider the SAT is good (used only for display, no effect on GPS measurements)
 const uint8_t SAT_GOOD_SNR = 20;
 
+const uint32_t LOGGING_DISPLAY_INTERVAL = 20000; // ms, after this period of time GG goes to normal mode (display off)
+
 // GPS fix rates
 const uint16_t NORMAL_RATE = 5000; //ms = 1 tick per 5 sec
 const uint16_t FAST_RATE = 1000;   //ms = 1 tick per 1 sec = 1Hz
