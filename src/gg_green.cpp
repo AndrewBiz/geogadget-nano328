@@ -37,12 +37,8 @@ void CPU_sleepNow() {
    * SLEEP_MODE_STANDBY
    * SLEEP_MODE_PWR_DOWN -the most power savings
    */
-  // set_sleep_mode(SLEEP_MODE_IDLE); // sleep mode is set here
-
-  // FIXME SD over SPI is not working after wakeup
 
   set_sleep_mode(SLEEP_MODE_STANDBY); // sleep mode is set here
-  // set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
 
   noInterrupts();
 
@@ -50,7 +46,7 @@ void CPU_sleepNow() {
 
   sleep_enable(); // enables the sleep bit in the mcucr register
 
-  // power_adc_disable();
+  power_adc_disable();
   // power_spi_disable();
   // power_timer0_disable();
   // power_timer1_disable();

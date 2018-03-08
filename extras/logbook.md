@@ -1,11 +1,18 @@
 # Project logbook
 
 ## Power save modes
+### MAX Power
+device current: 77mA-94mA
+
 ### SLEEP_MODE_PWR_DOWN
 wake_up takes 1000us
 
 ### SLEEP_MODE_STANDBY
 wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
+
+#### device current:
+  good signal: 56mA - 35mA (some times) (with external antenna = 9mA)
+  bad signal:  65mA - 23mA
 
 ## Memory use
 
@@ -43,3 +50,5 @@ wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
 |28586 |1691 | baudrate 19200
 |28852 |1660 | sleep CPU in normal mode
 |28964 |1661 | added INT0 and INT1 ISR
+|29012 |1699 | -DDEBUG + new DebugTools class
+|28972 |1729 | DEBUG off, sleep STANDBY in normal mode

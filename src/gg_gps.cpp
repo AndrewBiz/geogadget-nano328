@@ -185,9 +185,7 @@ void GPS::start_running() {
 
   // set 1Hz rate (1000ms)
   if (!set_rate(1000)) {
-    D(DEBUG_PORT.println(F("set rate FAILED!"));)
-  } else {
-    D(DEBUG_PORT.println(F("set rate OK"));)
+    // D(DEBUG_PORT.println(F("set rate FAILED!"));)
   }
 
   // initially disabling all messages
@@ -200,51 +198,36 @@ void GPS::start_running() {
   disable_msg(ublox::UBX_NAV, ublox::UBX_NAV_SVINFO);
 
   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_STATUS )){
-    D(DEBUG_PORT.println(F("enable UBX_NAV_STATUS failed!"));)
-  } else {
-    D(DEBUG_PORT.println(F("enabled UBX_NAV_STATUS"));)
+    // D(DEBUG_PORT.println(F("enable UBX_NAV_STATUS failed!"));)
   }
 
   if (!enable_msg( ublox::UBX_NAV, ublox::UBX_NAV_TIMEGPS )) {
-    D(DEBUG_PORT.println(F("enable UBX_NAV_TIMEGPS failed!"));)
-  } else {
-    D(DEBUG_PORT.println(F("enabled UBX_NAV_TIMEGPS"));)
+    // D(DEBUG_PORT.println(F("enable UBX_NAV_TIMEGPS failed!"));)
   }
 
   if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_TIMEUTC)) {
-    D(DEBUG_PORT.println(F("enable UBX_NAV_TIMEUTC failed!"));)
-  } else {
-    D(DEBUG_PORT.println(F("enabled UBX_NAV_TIMEUTC"));)
+    // D(DEBUG_PORT.println(F("enable UBX_NAV_TIMEUTC failed!"));)
   }
 
-
   if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_POSLLH)) {
-    D(DEBUG_PORT.println(F("enable UBX_NAV_POSLLH failed!"));)
-  } else {
-    D(DEBUG_PORT.println(F("enabled UBX_NAV_POSLLH"));)
+    // D(DEBUG_PORT.println(F("enable UBX_NAV_POSLLH failed!"));)
   }
 
   #if (defined(GPS_FIX_SPEED) | defined(GPS_FIX_HEADING)) & defined(UBLOX_PARSE_VELNED)
     if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_VELNED)) {
-      D(DEBUG_PORT.println(F("enable UBX_NAV_VELNED failed!"));)
-    } else {
-      D(DEBUG_PORT.println(F("enabled UBX_NAV_VELNED"));)
+      // D(DEBUG_PORT.println(F("enable UBX_NAV_VELNED failed!"));)
     }
   #endif
 
   #if defined(UBLOX_PARSE_DOP)
     if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_DOP)) {
-      D(DEBUG_PORT.println(F("enable UBX_NAV_DOP failed!"));)
-    } else {
-      D(DEBUG_PORT.println(F("enabled UBX_NAV_DOP"));)
+      // D(DEBUG_PORT.println(F("enable UBX_NAV_DOP failed!"));)
     }
   #endif
 
   #if (defined(GPS_FIX_SATELLITES) | defined(NMEAGPS_PARSE_SATELLITES)) & defined(UBLOX_PARSE_SVINFO)
     if (!enable_msg(ublox::UBX_NAV, ublox::UBX_NAV_SVINFO)) {
-      D(DEBUG_PORT.println(F("enable UBX_NAV_SVINFO failed!"));)
-    } else {
-      D(DEBUG_PORT.println(F("enabled UBX_NAV_SVINFO"));)
+      // D(DEBUG_PORT.println(F("enable UBX_NAV_SVINFO failed!"));)
     }
   #endif
 
@@ -257,25 +240,20 @@ void GPS::get_signal() {
   static uint32_t dotPrint;
 
   lock();
-  bool              safe = is_safe();
-  NeoGPS::clock_t   sow  = GPSTime::start_of_week();
-  gps_fix::status_t status = fix().status;
+  bool              safe    = is_safe();
+  NeoGPS::clock_t   sow     = GPSTime::start_of_week();
+  gps_fix::status_t status  = fix().status;
   unlock();
 
   if (safe && (sow != 0) && (status != gps_fix::STATUS_NONE)) {
-    D(if (acquiring) DEBUG_PORT << '\n';)
-    D(DEBUG_PORT << F("Acquired Satus: ") << status << '\n';)
-    D(DEBUG_PORT << F("Acquired Start-of-Week: ") << sow << '\n';)
     // go to running state
     state = RUNNING;
   } else {
     if (!acquiring) {
       acquiring = true;
       dotPrint = millis();
-      D(DEBUG_PORT.print(F("Getting signal..."));)
     } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
       dotPrint = millis();
-      // DEBUG_PORT.print(F("."));
     }
   }
 } // get_signal

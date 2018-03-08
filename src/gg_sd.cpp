@@ -110,12 +110,6 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
   }
   gg_file.print(F("</fix>"));
 
-  // gg_file.print(F("<desc>"));
-  // gg_file.print(ts_nofix_detected);
-  // gg_file.print(F(", "));
-  // gg_file.print(ts_current);
-  // gg_file.print(F("</desc>"));
-
   gg_file.print(F("<time>"));
   gg_file.print(
     format_date( _buf, '-',
@@ -159,9 +153,4 @@ void setup_sd(const NMEAGPS &gps, const gps_fix &fix) {
     sd.initErrorHalt();
   }
   create_file(fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
-
-  D(DEBUG_PORT.print(F("Logging to: "));)
-  D(DEBUG_PORT.print(gg_dir_name);)
-  D(DEBUG_PORT.print(F("/"));)
-  D(DEBUG_PORT.println(gg_file_name);)
 }

@@ -15,12 +15,9 @@
 #include "gg_display.hpp"
 #include "gg_green.hpp"
 
-const uint16_t CPU_SLEEP_INTERVAL = 200; // ms
-
 GG_Display display;
 
-const uint8_t PIN_TEST = PD4;
-uint8_t test_level = LOW;
+D(DebugTools _debug(PD4, LOW);)    // for debug via logic analyzer - see port PD4 behaviour
 
 const uint8_t PIN_GPS_PPS = PD3;    // Ublox pps connected to PD3 (INT1)
 
@@ -39,21 +36,12 @@ static gps_fix fix;
 void setup() {
   // DEBUG_PORT.begin(9600);
 
-pinMode(PIN_TEST, OUTPUT);
-digitalWrite(PIN_TEST, test_level);
-
   display.init();
-
-  D(DEBUG_PORT.println(F("Geo-Gadget v" GG_VERSION));)
-  D(DEBUG_PORT << F("fix object size = ") << sizeof(gps.fix()) << '\n';)
-  D(DEBUG_PORT << F("GPS object size = ") << sizeof(gps) << '\n';)
-  D(DEBUG_PORT.flush();)
 
   // GPS device initializing
   pinMode(PIN_GPS_PPS, INPUT_PULLUP);
 
   gpsPort.begin(9600);
-  D(DEBUG_PORT.println(F("Looking for GPS device on " GPS_PORT_NAME));)
 
   // changing GPS_PORT baudrate
   gps.set_fast_baudrate();
@@ -70,28 +58,20 @@ digitalWrite(PIN_TEST, test_level);
       running = gps.running();
     }
     display.show_init_screen(gps, fix);
-    // _dumpPort(gpsPort, DEBUG_PORT, 1200);
   } while (not running);
 
   // SD card initializing
   setup_sd(gps, fix);
 
-  D(trace_header(DEBUG_PORT);)
   mode = Mode::TO_LOGGING_DISPLAY;
 }
 
 //--------------------------
 void loop() {
-  static uint32_t ts_prev = millis();
   modeButton.update();
-
-  uint32_t now = millis();
-  // _tick(DEBUG_PORT);
 
   switch (mode) {
     case Mode::LOGGING_DISPLAY:
-test_level = !test_level;
-digitalWrite(PIN_TEST, test_level);
       if (gps.available(gpsPort)) {
         fix = gps.read();
         display.show_main_screen(gps, fix, gg_file_name);
@@ -110,28 +90,13 @@ digitalWrite(PIN_TEST, test_level);
       break;
 
     case Mode::LOGGING_NORMAL:
-      if (int_pps_event) {
-test_level = !test_level;
-digitalWrite(PIN_TEST, test_level);
-      }
-
       if (gps.available(gpsPort)) {
         fix = gps.read();
         log_fix(gps, fix);
+        // D(_debug.toggle_test_pin();)
         CPU_sleepNow();
-  // gpsPort.begin(GPS_UART_BAUDRATE_FAST);
-        ts_prev = millis();
-test_level = !test_level;
-digitalWrite(PIN_TEST, test_level);
+        // D(_debug.toggle_test_pin();)
       }
-//       // go to sleep
-//       if ((now - ts_prev) >= CPU_SLEEP_INTERVAL) {
-//         CPU_sleepNow();
-//   // gpsPort.begin(GPS_UART_BAUDRATE_FAST);
-//         ts_prev = millis();
-// test_level = !test_level;
-// digitalWrite(PIN_TEST, test_level);
-//       };
       if (modeButton.isSingleClick() || int_btn_event) {
         mode = Mode::TO_LOGGING_DISPLAY;
       }
@@ -140,9 +105,8 @@ digitalWrite(PIN_TEST, test_level);
     case Mode::TO_LOGGING_DISPLAY:
       gps.set_rate(FAST_RATE);  // 1Hz normally
       gps.go_power_max();
-  display.init();
-      // display.wakeup();
-      // display.clear();
+      display.init();
+      int_btn_event = false;
       mode = Mode::LOGGING_DISPLAY;
       break;
 
