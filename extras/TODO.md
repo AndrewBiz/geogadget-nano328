@@ -8,11 +8,12 @@
 - [x] upgrade to GPX 1.1, add header info to GPX (Geo-Gadged, version, url)
 - [x] green gg: power save mode of GPS device: cyclyc tracking
 - [x] log NoFix records every 5 minutes (to avoid recording 2Hz useless fixes in weak signal (cyclyc mode))
-- [ ] green gg: minimal LED flashing via UBX-CFG start_running (TIMEPULSE)
+- [x] green gg: minimal LED flashing via UBX-CFG start_running (TIMEPULSE)
+- [x] baudrate to increase btw GPS and MCU (115200?)
+- [x] completely disable NMEA via CFG-PRT
+- [x] green gg: implement sleep_mode (like in OpenLog project), wake up via UART OR Button press
+- [ ] green gg: go to normal_mode from display_mode after 10-20 sec
 - [ ] green gg: log 1 fix per xx (5-10 sec) in all modes (in sd_log)
-- [ ] baudrate to increase btw GPS and MCU (115200?)
-- [ ] completely disable NMEA via CFG-PRT
-- [ ] green gg: implement sleep_mode (like in OpenLog project), wake up via UART OR Button press
 - [ ] green gg: to wake up GPS send dummy 0xff message to GPS and wait for ACK
 - [ ] do SD card init message (like in NMEASDLOG.ino)
 - [ ] make parsing UBX-NAV-PVT instead all other tags
