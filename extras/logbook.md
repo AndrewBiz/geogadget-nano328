@@ -1,4 +1,12 @@
 # Project logbook
+
+## Power save modes
+### SLEEP_MODE_PWR_DOWN
+wake_up takes 1000us
+
+### SLEEP_MODE_STANDBY
+wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
+
 ## Memory use
 
 |FLASH |RAM  |Comment                      |

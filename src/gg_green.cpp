@@ -38,20 +38,23 @@ void CPU_sleepNow() {
    * SLEEP_MODE_PWR_DOWN -the most power savings
    */
   // set_sleep_mode(SLEEP_MODE_IDLE); // sleep mode is set here
-  // TODO try another modes
+
   // FIXME SD over SPI is not working after wakeup
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
+
+  set_sleep_mode(SLEEP_MODE_STANDBY); // sleep mode is set here
+  // set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
 
   noInterrupts();
-  // PCICR = 0x00;  /// PinChange interrupst 0-1-2 disable
+
+  PCICR = 0x00;  /// PinChange interrupt 0-1-2 disable
 
   sleep_enable(); // enables the sleep bit in the mcucr register
 
-  power_adc_disable();
+  // power_adc_disable();
   // power_spi_disable();
-  power_timer0_disable();
-  power_timer1_disable();
-  power_timer2_disable();
+  // power_timer0_disable();
+  // power_timer1_disable();
+  // power_timer2_disable();
   // power_twi_disable();
   sleep_bod_disable();
 
@@ -59,13 +62,14 @@ void CPU_sleepNow() {
   attachInterrupt(PPS_INT, wakeUpNow_PPS, LOW);
 
   interrupts();
+
   sleep_cpu(); // here the device is actually put to sleep!!
   // ...ZZZZZZZ.....
   // THE PROGRAM CONTINUES FROM HERE AFTER WAKING UP
   sleep_disable(); // first thing after waking from sleep:
   // power_all_enable();
   // power_spi_enable(); //After wake up, power up peripherals
-  power_timer0_enable();
-  power_timer1_enable();
-  power_timer2_enable();
+  // power_timer0_enable();
+  // power_timer1_enable();
+  // power_timer2_enable();
 }

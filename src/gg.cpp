@@ -19,11 +19,15 @@ const uint16_t CPU_SLEEP_INTERVAL = 200; // ms
 
 GG_Display display;
 
+const uint8_t PIN_TEST = PD4;
+uint8_t test_level = LOW;
+
 const uint8_t PIN_GPS_PPS = PD3;    // Ublox pps connected to PD3 (INT1)
 
 const uint8_t modeButtonPin = PD2;  // button connected to PD2 (INT0)
 PinButton modeButton(modeButtonPin);
 extern bool int_btn_event;
+extern bool int_pps_event;
 
 enum class Mode : uint8_t {LOGGING_DISPLAY, TO_LOGGING_NORMAL, LOGGING_NORMAL, TO_LOGGING_DISPLAY} mode;
 
@@ -33,7 +37,10 @@ static gps_fix fix;
 
 //--------------------------
 void setup() {
-  DEBUG_PORT.begin(9600);
+  // DEBUG_PORT.begin(9600);
+
+pinMode(PIN_TEST, OUTPUT);
+digitalWrite(PIN_TEST, test_level);
 
   display.init();
 
@@ -83,6 +90,8 @@ void loop() {
 
   switch (mode) {
     case Mode::LOGGING_DISPLAY:
+test_level = !test_level;
+digitalWrite(PIN_TEST, test_level);
       if (gps.available(gpsPort)) {
         fix = gps.read();
         display.show_main_screen(gps, fix, gg_file_name);
@@ -101,19 +110,28 @@ void loop() {
       break;
 
     case Mode::LOGGING_NORMAL:
+      if (int_pps_event) {
+test_level = !test_level;
+digitalWrite(PIN_TEST, test_level);
+      }
+
       if (gps.available(gpsPort)) {
         fix = gps.read();
         log_fix(gps, fix);
-      }
-      // go to sleep
-      if ((now - ts_prev) >= CPU_SLEEP_INTERVAL) {
-  DEBUG_PORT.println(F("go to sleep"));
-  DEBUG_PORT.flush();
         CPU_sleepNow();
-  DEBUG_PORT.println(F("good morning!"));
+  // gpsPort.begin(GPS_UART_BAUDRATE_FAST);
         ts_prev = millis();
-      };
-      // wake up here!
+test_level = !test_level;
+digitalWrite(PIN_TEST, test_level);
+      }
+//       // go to sleep
+//       if ((now - ts_prev) >= CPU_SLEEP_INTERVAL) {
+//         CPU_sleepNow();
+//   // gpsPort.begin(GPS_UART_BAUDRATE_FAST);
+//         ts_prev = millis();
+// test_level = !test_level;
+// digitalWrite(PIN_TEST, test_level);
+//       };
       if (modeButton.isSingleClick() || int_btn_event) {
         mode = Mode::TO_LOGGING_DISPLAY;
       }
