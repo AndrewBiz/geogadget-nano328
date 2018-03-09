@@ -13,6 +13,7 @@
 - [x] completely disable NMEA via CFG-PRT
 - [x] green gg: implement sleep_mode (like in OpenLog project), wake up via UART OR Button press
 - [x] green gg: go to normal_mode from display_mode after 10-20 sec
+- [ ] green gg: make all unused pins as OUTPUT LOW
 - [ ] green gg: to wake up GPS send dummy 0xff message to GPS and wait for ACK
 - [ ] do SD card init message (like in NMEASDLOG.ino)
 - [ ] do SD card error messages to display
