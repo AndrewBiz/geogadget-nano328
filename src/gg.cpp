@@ -75,6 +75,7 @@ void loop() {
   modeButton.update();
 
   switch (mode) {
+
     case Mode::LOGGING_DISPLAY:
       if (gps.available(gpsPort)) {
         fix = gps.read();
@@ -88,7 +89,11 @@ void loop() {
 
     case Mode::TO_LOGGING_NORMAL:
       gps.set_rate(NORMAL_RATE);
-      gps.go_power_save();
+
+      #if defined(UBLOX_POWER_SAVE_MODE)
+         gps.go_power_save(); // The GG device goes less than 20mA - this can cause some power banks to switch off!
+      #endif
+
       display.sleep();
       mode = Mode::LOGGING_NORMAL;
       break;
@@ -108,7 +113,9 @@ void loop() {
 
     case Mode::TO_LOGGING_DISPLAY:
       gps.set_rate(FAST_RATE);  // 1Hz normally
-      gps.go_power_max();
+      #if defined(UBLOX_POWER_SAVE_MODE)
+        gps.go_power_max();
+      #endif
       display.init();
       int_btn_event = false;
       ts_logging_display_started = millis();

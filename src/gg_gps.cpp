@@ -29,6 +29,7 @@ const unsigned char ubx_cfg_prt_fast[] PROGMEM = {
 };
 
 
+#if defined(UBLOX_POWER_SAVE_MODE)
 const uint32_t GPS_SEARCH_PERIOD = 20000; // ms, 20 sec
 const uint16_t GPS_MIN_ACQ_TIME = 0; // s
 
@@ -71,6 +72,7 @@ const unsigned char ubx_cfg_rxm_power_save[] PROGMEM = {
   0x08,         // reserved = 08
   0x01          // lpMode (01 = PowerSave)
 };
+#endif
 
 const unsigned char ubx_cfg_rxm_power_max[] PROGMEM = {
   0x06, 0x11,   // ID CFG-RXM
@@ -86,6 +88,7 @@ const uint32_t GPS_PULSE_FIX_PERIOD_FAST = (uint32_t)FAST_RATE * 1000; // us, 1 
 const uint32_t GPS_PULSE_NOFIX_LEN = 1000; // us, 0.001 sec
 const uint32_t GPS_PULSE_FIX_LEN = 1000;     // us, 0.001 sec
 
+#if defined(UBLOX_POWER_SAVE_MODE)
 const unsigned char ubx_cfg_tp5_power_save[] PROGMEM = {
   0x06, 0x31,   // ID CFG-TP5
   0x20, 0x00,   // len = 32b
@@ -117,6 +120,7 @@ const unsigned char ubx_cfg_tp5_power_save[] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, // userConfigDelay
   0x37, 0x00, 0x00, 0x00  // flags = 0x37 = 0011 0111
 };
+#endif
 
 const unsigned char ubx_cfg_tp5_power_max[] PROGMEM = {
   0x06, 0x31,   // ID CFG-TP5
@@ -166,12 +170,14 @@ bool GPS::set_rate(uint16_t rate) {
   return send(ublox::cfg_rate_t(rate, 1, ublox::UBX_TIME_REF_UTC));
 }
 
+#if defined(UBLOX_POWER_SAVE_MODE)
 //--------------------------
 void GPS::go_power_save() {
   write_P_simple(ubx_cfg_tp5_power_save, sizeof(ubx_cfg_tp5_power_save));
   write_P_simple(ubx_cfg_pm2_cyclic, sizeof(ubx_cfg_pm2_cyclic));
   write_P_simple(ubx_cfg_rxm_power_save, sizeof(ubx_cfg_rxm_power_save));
 }
+#endif
 
 //--------------------------
 void GPS::go_power_max() {
@@ -236,25 +242,15 @@ void GPS::start_running() {
 
 //--------------------------
 void GPS::get_signal() {
-  static bool acquiring = false;
-  static uint32_t dotPrint;
-
   lock();
   bool              safe    = is_safe();
   NeoGPS::clock_t   sow     = GPSTime::start_of_week();
   gps_fix::status_t status  = fix().status;
   unlock();
 
-  if (safe && (sow != 0) && (status != gps_fix::STATUS_NONE)) {
+  if (safe && (sow != 0) && (status >= gps_fix::STATUS_STD)) {
     // go to running state
     state = RUNNING;
-  } else {
-    if (!acquiring) {
-      acquiring = true;
-      dotPrint = millis();
-    } else if (millis() - dotPrint > ACQ_DOT_INTERVAL) {
-      dotPrint = millis();
-    }
   }
 } // get_signal
 

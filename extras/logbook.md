@@ -53,3 +53,5 @@ wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
 |29012 |1699 | -DDEBUG + new DebugTools class
 |28972 |1729 | DEBUG off, sleep STANDBY in normal mode
 |29074 |1737 | auto display-off after 20 sec
+|28948 |1737 | disabled go_power_save for GPS (to low current flow!)
+|28828 |1696 | cleaned get_signal function
