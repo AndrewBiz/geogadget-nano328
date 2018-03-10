@@ -77,9 +77,9 @@ void GG_Display::show_init_screen(const NMEAGPS & gps, const gps_fix & fix) {
   _display.setCursor(3, 1);
   _display.print(F("v " GG_VERSION));
 
-  _display.setCursor(0, 2);
-  _display.print(F("getting signal"));
-  _display.setCursor(15, 2);
+  _display.setCursor(7, 2);
+  // _display.print(F("getting signal"));
+  // _display.setCursor(15, 2);
   if (millis() - spin_phase_time > 100) {
     // spin phases clockwise: "|/-\|/-\"
     spin_phase_time = millis();
