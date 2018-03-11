@@ -55,3 +55,4 @@ wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
 |29074 |1737 | auto display-off after 20 sec
 |28948 |1737 | disabled go_power_save for GPS (to low current flow!)
 |28828 |1696 | cleaned get_signal function
+|28884 |1732 | make time_pulse power save mode back (GPS PPS will flash every 5 sec)

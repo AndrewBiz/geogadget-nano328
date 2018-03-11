@@ -82,13 +82,16 @@ const unsigned char ubx_cfg_rxm_power_max[] PROGMEM = {
 };
 
 // CFG-TP5
-const uint32_t GPS_PULSE_NOFIX_PERIOD = 7000000; // us, 7 sec
+#if defined(UBLOX_POWER_SAVE_MODE)
+  const uint32_t GPS_PULSE_NOFIX_PERIOD = 7000000; // us, 7 sec (for cyclyc mode)
+#else
+  const uint32_t GPS_PULSE_NOFIX_PERIOD = 10000000; // us, 10 sec (for normal power mode)
+#endif
 const uint32_t GPS_PULSE_FIX_PERIOD_NORMAL = (uint32_t)NORMAL_RATE * 1000; // us, 5 sec
 const uint32_t GPS_PULSE_FIX_PERIOD_FAST = (uint32_t)FAST_RATE * 1000; // us, 1 sec
 const uint32_t GPS_PULSE_NOFIX_LEN = 1000; // us, 0.001 sec
 const uint32_t GPS_PULSE_FIX_LEN = 1000;     // us, 0.001 sec
 
-#if defined(UBLOX_POWER_SAVE_MODE)
 const unsigned char ubx_cfg_tp5_power_save[] PROGMEM = {
   0x06, 0x31,   // ID CFG-TP5
   0x20, 0x00,   // len = 32b
@@ -120,7 +123,6 @@ const unsigned char ubx_cfg_tp5_power_save[] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, // userConfigDelay
   0x37, 0x00, 0x00, 0x00  // flags = 0x37 = 0011 0111
 };
-#endif
 
 const unsigned char ubx_cfg_tp5_power_max[] PROGMEM = {
   0x06, 0x31,   // ID CFG-TP5
@@ -170,14 +172,14 @@ bool GPS::set_rate(uint16_t rate) {
   return send(ublox::cfg_rate_t(rate, 1, ublox::UBX_TIME_REF_UTC));
 }
 
-#if defined(UBLOX_POWER_SAVE_MODE)
 //--------------------------
 void GPS::go_power_save() {
   write_P_simple(ubx_cfg_tp5_power_save, sizeof(ubx_cfg_tp5_power_save));
-  write_P_simple(ubx_cfg_pm2_cyclic, sizeof(ubx_cfg_pm2_cyclic));
-  write_P_simple(ubx_cfg_rxm_power_save, sizeof(ubx_cfg_rxm_power_save));
+  #if defined(UBLOX_POWER_SAVE_MODE)
+    write_P_simple(ubx_cfg_pm2_cyclic, sizeof(ubx_cfg_pm2_cyclic));
+    write_P_simple(ubx_cfg_rxm_power_save, sizeof(ubx_cfg_rxm_power_save));
+  #endif
 }
-#endif
 
 //--------------------------
 void GPS::go_power_max() {

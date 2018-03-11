@@ -89,11 +89,7 @@ void loop() {
 
     case Mode::TO_LOGGING_NORMAL:
       gps.set_rate(NORMAL_RATE);
-
-      #if defined(UBLOX_POWER_SAVE_MODE)
-         gps.go_power_save(); // The GG device goes less than 20mA - this can cause some power banks to switch off!
-      #endif
-
+      gps.go_power_save();
       display.sleep();
       mode = Mode::LOGGING_NORMAL;
       break;
@@ -113,9 +109,7 @@ void loop() {
 
     case Mode::TO_LOGGING_DISPLAY:
       gps.set_rate(FAST_RATE);  // 1Hz normally
-      #if defined(UBLOX_POWER_SAVE_MODE)
-        gps.go_power_max();
-      #endif
+      gps.go_power_max();
       display.init();
       int_btn_event = false;
       ts_logging_display_started = millis();
