@@ -14,8 +14,11 @@
 #include "gg_format.hpp"
 #include "gg_display.hpp"
 #include "gg_green.hpp"
+#include "gg_error.hpp"
 
 GG_Display display;
+
+GG_Error error(&display);
 
 D(DebugTools _debug(PD4, LOW);)    // for debug via logic analyzer - see port PD4 behaviour
 
@@ -61,7 +64,7 @@ void setup() {
   } while (not running);
 
   // SD card initializing
-  setup_sd(gps, fix);
+  setup_sd(gps, fix, error);
 
   mode = Mode::TO_LOGGING_DISPLAY;
 }
@@ -80,7 +83,7 @@ void loop() {
       if (gps.available(gpsPort)) {
         fix = gps.read();
         display.show_main_screen(gps, fix, gg_file_name);
-        log_fix(gps, fix);
+        log_fix(gps, fix, error);
       }
       if (modeButton.isSingleClick() or ((ts_now - ts_logging_display_started) >= LOGGING_DISPLAY_INTERVAL)) {
         mode = Mode::TO_LOGGING_NORMAL;
@@ -97,7 +100,7 @@ void loop() {
     case Mode::LOGGING_NORMAL:
       if (gps.available(gpsPort)) {
         fix = gps.read();
-        log_fix(gps, fix);
+        log_fix(gps, fix, error);
         // D(_debug.toggle_test_pin();)
         CPU_sleepNow();
         // D(_debug.toggle_test_pin();)

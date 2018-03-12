@@ -15,8 +15,7 @@
 - [x] green gg: go to normal_mode from display_mode after 10-20 sec
 - [x] NO green: too geen is BAD. If the current less than 20ma - the power-bank switches off. Need to turn off GPS power save mode
 - [x] avoid go to display mode i case of no-fix \\ no-timefix
-- [ ] do SD card init message (like in NMEASDLOG.ino)
-- [ ] do SD card error messages to display
+- [x] do SD card error messages to display
 - [ ] check ERR is wrong
 - [ ] check ALT is wrong
 ***** version 01.00.00 *****

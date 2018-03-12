@@ -56,3 +56,5 @@ wake_up takes 14us (71 times faster than PWR_DOWN sleep mode!)
 |28948 |1737 | disabled go_power_save for GPS (to low current flow!)
 |28828 |1696 | cleaned get_signal function
 |28884 |1732 | make time_pulse power save mode back (GPS PPS will flash every 5 sec)
+|27952 |1489!| replaced CDFat error with GG_error (-250 bytes!, -1000b flash!)
+|27980 |1525 | tune error wordings and behavior

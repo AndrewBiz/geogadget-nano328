@@ -9,22 +9,27 @@ const char format_sta_sat[] PROGMEM = "ST %1d SAT: %02d(%02d)";
 
 
 // Definition section
+//-----------------------------------------------------------------------------
 void GG_Display::init() {
   _display.begin();
 };
 
+//-----------------------------------------------------------------------------
 void GG_Display::clear() {
   _display.clear();
 }
 
+//-----------------------------------------------------------------------------
 void GG_Display::sleep() {
   _display.setPowerSave(1); //activates power save on display
 };
 
+//-----------------------------------------------------------------------------
 void GG_Display::wakeup() {
   _display.setPowerSave(0); //deactivates power save on display
 };
 
+//-----------------------------------------------------------------------------
 void GG_Display::_sta_sat(const NMEAGPS & gps, const gps_fix & fix) {
   char _buf[17];
   uint8_t sats_ok = 0;
@@ -42,6 +47,7 @@ void GG_Display::_sta_sat(const NMEAGPS & gps, const gps_fix & fix) {
   _display.print(_buf);
 }
 
+//-----------------------------------------------------------------------------
 void GG_Display::_ymd(const NMEAGPS & gps, const gps_fix & fix) {
   char _buf[17];
   _display.print(F("YMD: "));
@@ -54,6 +60,7 @@ void GG_Display::_ymd(const NMEAGPS & gps, const gps_fix & fix) {
   );
 }
 
+//-----------------------------------------------------------------------------
 void GG_Display::_hms(const NMEAGPS & gps, const gps_fix & fix) {
   char _buf[17];
   _display.print(F("HMS: "));
@@ -66,6 +73,7 @@ void GG_Display::_hms(const NMEAGPS & gps, const gps_fix & fix) {
   );
 }
 
+//-----------------------------------------------------------------------------
 void GG_Display::show_init_screen(const NMEAGPS & gps, const gps_fix & fix) {
   static uint32_t spin_phase_time = 0;
   static uint8_t spin_phase = 0;
@@ -98,7 +106,7 @@ void GG_Display::show_init_screen(const NMEAGPS & gps, const gps_fix & fix) {
   _display.setInverseFont(0);
 }
 
-
+//-----------------------------------------------------------------------------
 void GG_Display::show_main_screen(const NMEAGPS & gps, const gps_fix & fix, char* gg_file_name) {
   char _buf[17];
 
@@ -147,4 +155,19 @@ void GG_Display::show_main_screen(const NMEAGPS & gps, const gps_fix & fix, char
   _display.setCursor(0, 7);
   _display.print(F("LOG: "));
   _display.print(gg_file_name);
+}
+
+//-----------------------------------------------------------------------------
+void GG_Display::show_error_screen(const uint8_t error_type, PGM_P error_str) {
+  char _buf[17];
+  _display.clear();
+  _display.setFont(u8x8_font_artossans8_r);
+  _display.setCursor(4, 2);
+  _display.print(F("ERROR ("));
+  _display.print(error_type);
+  _display.print(F(")"));
+
+  _display.setCursor(0, 4);
+  strcpy_P(_buf, error_str);
+  _display.print(_buf);
 }

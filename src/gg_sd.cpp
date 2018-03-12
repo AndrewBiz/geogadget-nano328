@@ -4,6 +4,7 @@
 #include "gg_sd.hpp"
 #include "gg_gps.hpp"
 #include "gg_format.hpp"
+#include "gg_error.hpp"
 
 #include <SdFat.h>
 // Error messages stored in flash.
@@ -23,47 +24,9 @@ SdFile gg_file;
 char gg_file_name[] = FILE_BASE_NAME "00.GPX";
 char gg_dir_name[9] = "";
 
-//--------------------------
-void create_file(uint16_t year, uint8_t month, uint8_t date, uint8_t hours, uint8_t minutes, uint8_t seconds) {
-  if (!sd.chdir(true)) {
-    error("chdir 1");
-  }
-  // create dir for today
-  format_date(gg_dir_name, ' ', year, month, date);
-  if (!sd.exists(gg_dir_name)) {
-    if (!sd.mkdir(gg_dir_name)) {
-      error("Create dir");
-    }
-  }
-  if (!sd.chdir(gg_dir_name, true)) {
-    error("chdir 2");
-  }
-
-  for (uint8_t i = 0; i < 100; i++) {
-    gg_file_name[FILE_NAME_DIGIT_H] = '0' + i/10;
-    gg_file_name[FILE_NAME_DIGIT_L] = '0' + i%10;
-    if (!sd.exists(gg_file_name)) {
-      // Use this one!
-      break;
-    }
-  }
-  if (!gg_file.open(gg_file_name, O_CREAT | O_WRITE | O_EXCL)) {
-    error("file open");
-  }
-  // set file datetimes
-  if (!gg_file.timestamp((T_CREATE | T_WRITE | T_ACCESS), year, month, date, hours, minutes, seconds)) {
-    error("set timestamp");
-  }
-  gg_file.print(F(
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<gpx version=\"1.1\" creator=\"Geo-Gadget v" GG_VERSION " (" GG_ORIGIN ")\">\n"
-    "\t<trk><trkseg>\n"));
-  gg_file.print(F(GPX_ENDING));
-}
-
-//--------------------------
+//-----------------------------------------------------------------------------
 // Log a data record to SD card file
-void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
+void log_fix(const NMEAGPS& gps, const gps_fix& fix, GG_Error& error) {
   char _buf[15];
   static NeoGPS::clock_t ts_nofix_detected = 0;
 
@@ -140,17 +103,68 @@ void log_fix(const NMEAGPS& gps, const gps_fix& fix) {
 
   // Force data to SD and update the directory entry to avoid data loss.
   if (!gg_file.sync() || gg_file.getWriteError()) {
-    error("write file");
+    error.fatal(GG_Error::Type::SD_FILE_WRITE);
   }
+}
+
+//-----------------------------------------------------------------------------
+void create_file(
+                  uint16_t year,
+                  uint8_t month,
+                  uint8_t date,
+                  uint8_t hours,
+                  uint8_t minutes,
+                  uint8_t seconds,
+                  GG_Error& error) {
+
+  if (!sd.chdir(true)) {
+    error.fatal(GG_Error::Type::SD_CHDIR_ROOT);
+  }
+  // create dir for today
+  format_date(gg_dir_name, ' ', year, month, date);
+  if (!sd.exists(gg_dir_name)) {
+    if (!sd.mkdir(gg_dir_name)) {
+      error.fatal(GG_Error::Type::SD_MKDIR_WORKDIR);
+    }
+  }
+  if (!sd.chdir(gg_dir_name, true)) {
+    error.fatal(GG_Error::Type::SD_CHDIR_WORKDIR);
+  }
+
+  for (uint8_t i = 0; i < 100; i++) {
+    gg_file_name[FILE_NAME_DIGIT_H] = '0' + i/10;
+    gg_file_name[FILE_NAME_DIGIT_L] = '0' + i%10;
+    if (!sd.exists(gg_file_name)) {
+      break;
+    }
+  }
+  if (!gg_file.open(gg_file_name, O_CREAT | O_WRITE | O_EXCL)) {
+    error.fatal(GG_Error::Type::SD_OPEN_FILE);
+  }
+  // set file datetimes
+  if (!gg_file.timestamp((T_CREATE | T_WRITE | T_ACCESS), year, month, date, hours, minutes, seconds)) {
+    error.fatal(GG_Error::Type::SD_SET_TIMESTAMP);
+  }
+  gg_file.print(F(
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<gpx version=\"1.1\" creator=\"Geo-Gadget v" GG_VERSION " (" GG_ORIGIN ")\">\n"
+    "\t<trk><trkseg>\n"));
+  gg_file.print(F(GPX_ENDING));
 }
 
 //--------------------------
 // SD card initializing
-void setup_sd(const NMEAGPS &gps, const gps_fix &fix) {
+void setup_sd(const NMEAGPS& gps, const gps_fix& fix, GG_Error& error) {
   // Initialize at the highest speed supported by the board that is
   // not over 50 MHz. Try a lower speed if SPI errors occur.
   if (!sd.begin(chipSelect, SD_SCK_MHZ(50))) {
-    sd.initErrorHalt();
+    error.fatal(GG_Error::Type::SD_INIT);
   }
-  create_file(fix.dateTime.full_year(fix.dateTime.year), fix.dateTime.month, fix.dateTime.date, fix.dateTime.hours, fix.dateTime.minutes, fix.dateTime.seconds);
+  create_file(fix.dateTime.full_year(fix.dateTime.year),
+              fix.dateTime.month,
+              fix.dateTime.date,
+              fix.dateTime.hours,
+              fix.dateTime.minutes,
+              fix.dateTime.seconds,
+              error);
 }
