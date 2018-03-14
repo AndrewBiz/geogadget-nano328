@@ -16,9 +16,9 @@
 - [x] NO green: too geen is BAD. If the current less than 20ma - the power-bank switches off. Need to turn off GPS power save mode
 - [x] avoid go to display mode i case of no-fix \\ no-timefix
 - [x] do SD card error messages to display
-- [ ] check ERR is wrong
-- [ ] check ALT is wrong
 ***** version 01.00.00 *****
+- [ ] check if ERR is wrong
+- [ ] check if ALT is wrong
 - [ ] green gg: make all unused pins as OUTPUT LOW
 - [ ] green gg: to wake up GPS send dummy 0xff message to GPS and wait for ACK
 - [ ] to understand how it works: ```
